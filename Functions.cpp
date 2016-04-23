@@ -81,8 +81,23 @@ void experiment::saveExperiment(std::string n, std::map<std::string, experiment>
 		std::map<std::string, experiment>::iterator ptr;
 		// look for experiment with key n
 		ptr = u.find(n);
-		datafile 
-		ptr.printExperiment();
+		if (ptr != u.end())
+		{
+			// dereference the pointer
+			experiment value = ptr->second;
+
+			// iterating over the whole measurement container for the appropriate experiment
+			for (auto vec_iter = value.measurementContainer.begin(); vec_iter != value.measurementContainer.end(); ++vec_iter)
+			{
+				// now iterate over the rows of type vector<measurement*>
+				for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+				{
+					(*meas_it)->printInfo;
+				}
+			}
+		}
+		else
+			throw "Could not find experiment";
 	}
 }
 
@@ -105,7 +120,7 @@ void datans::addExperiment(std::map<std::string, experiment> u)
 	{
 		tempHeadings.push_back(buf);
 	}
-	
+
 	// create experiment with desired name and headings, then clean up
 	experiment tempExp(tempName, tempHeadings);
 
@@ -113,8 +128,8 @@ void datans::addExperiment(std::map<std::string, experiment> u)
 	std::string tempdata;
 	std::vector<string> tempMeasurement;
 	std::vector<measurement*> rowMeasurement;
-
 	static int counter{ 0 };
+
 	do
 	{
 		for (unsigned int i = 0; i < tempHeadings.size(); ++i)
@@ -150,7 +165,7 @@ void datans::addExperiment(std::map<std::string, experiment> u)
 	u[tempName] = tempExp;
 }
 
-void datans::readExperiment(std::string &n, std::vector<experiment> &u)
+void datans::readExperiment(std::string n, std::map<std::string, experiment> u)
 {
 	std::ifstream datafile;
 	std::string templine, templine2, buf;
@@ -166,40 +181,31 @@ void datans::readExperiment(std::string &n, std::vector<experiment> &u)
 		std::stringstream ss(templine);
 		while (ss >> buf)
 		{
-			// create the headings vector
 			tempHeadings.push_back(buf);
 		}
-
 		// create the temporary experiment from filename and headings (remove file extension)
 		n.erase(n.end() - 4, n.end());
 		experiment tempExp(n, tempHeadings);
-
 		// position should now be on the second line
 		while (std::getline(datafile, templine))
 		{
 			// we read the whole line, then each measurement is tab delineated, so split into n strings (each string is a measurement)
 			// then create each measurement and push that back into a row. row is then pushed back into the measurement container
 			std::stringstream ss(templine);
-			// read up to the tab
 			while (getline(ss, templine2, '\t'))
 			{
 				// open a new stringstream containing just the info between tabs
 				std::stringstream ss2(templine2);
-				// while you can read values in (now space delimited)
 				while (ss2 >> buf)
 				{
-					// add the value to tempmeasurement
 					tempMeasurement.push_back(buf);
 				}
-				// now we have read the whole measurement, create it and push back into the row
 				rowMeasurement.push_back(addMeasurement(tempMeasurement));
 			}
-			// now we've read the whole line, so push back into measurement container
 			tempExp.measurementContainer.push_back(rowMeasurement);
 		}
-
 		tempHeadings.clear();
-		u.push_back(tempExp);
+		u[n] = tempExp;
 	}
 	datafile.close();
 }
