@@ -7,10 +7,12 @@ int main()
 {
 	vector<experiment> user;
 
+	std::map<std::string, experiment> user2;
+
 	measurement *testMeasure = new numMeasure;
 	testMeasure->printInfo();
 
-	addExperiment(user);
+	
 	delete testMeasure;
 
 	return 0;
