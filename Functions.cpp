@@ -50,11 +50,13 @@ measurement* datans::addMeasurement(std::vector<std::string> v)
 
 void experiment::printExperiment()
 {
+	// iterator so we can iterate through every measurement in the experiment
+	vector<measurement>::iterator it;
 
 }
 
 // function to save experiments to a file
-void experiment::saveExperiment(std::string &n)
+void experiment::saveExperiment(std::string n, std::map<std::string, experiment> u)
 {
 	std::string filename = n + ".txt";		// append .txt to the experiment name
 	
@@ -76,12 +78,16 @@ void experiment::saveExperiment(std::string &n)
 	datafile.open(filename);
 	if (datafile.is_open())
 	{
-
+		std::map<std::string, experiment>::iterator ptr;
+		// look for experiment with key n
+		ptr = u.find(n);
+		datafile 
+		ptr.printExperiment();
 	}
 }
 
 // function for a user to add an experiment by hand
-void datans::addExperiment(std::vector<experiment> &u)
+void datans::addExperiment(std::map<std::string, experiment> u)
 {
 	std::string tempName, tempHeads, buf;
 	std::vector<std::string> tempHeadings;
@@ -141,7 +147,7 @@ void datans::addExperiment(std::vector<experiment> &u)
 	} while (flag == 'Y' || flag == 'y');
 
 	tempHeadings.clear();
-	u.push_back(tempExp);
+	u[tempName] = tempExp;
 }
 
 void datans::readExperiment(std::string &n, std::vector<experiment> &u)

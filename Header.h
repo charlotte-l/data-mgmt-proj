@@ -8,6 +8,7 @@
 #include<sstream>
 #include<ctime>
 #include<fstream>
+#include<map>
 
 
 // anonymous namespace to avoid collisions
@@ -83,9 +84,9 @@ namespace datans
 		friend measurement* addMeasurement(std::vector<std::string> v);
 		
 		void printExperiment();		// to print experiment to screen
-		void saveExperiment(std::string &n);		// to save experiments to file
-		friend void addExperiment(std::vector<experiment> &u);								// to add experiments by hand
-		friend void readExperiment(std::string &n, std::vector<experiment> &u);				// to read experiment from a file
+		void saveExperiment(std::string n, std::map<std::string, experiment> u);		// to save experiments to file
+		friend void addExperiment(std::map<std::string, experiment> u);					// to add experiments by hand
+		friend void readExperiment(std::string n, std::vector<experiment> u);			// to read experiment from a file
 	};
 }
 
