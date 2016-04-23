@@ -14,6 +14,13 @@ void numMeasure::printInfo()
 	cout << value << "  " << error << "  " << systError << "  " << "  " << date << endl;
 };
 
+// function to test whether file already exists
+bool is_file_exist(std::string &n)
+{
+	std::ifstream infile(n);
+	return infile.good();
+}
+
 measurement* datans::addMeasurement(std::vector<std::string> v)
 {
 	int vectorSize = v.size();
@@ -50,6 +57,21 @@ void experiment::printExperiment()
 void experiment::saveExperiment(std::string &n)
 {
 	std::string filename = n + ".txt";		// append .txt to the experiment name
+	
+	// check if file exists; if so, check if user wants to overwrite or not
+	if (is_file_exist(n) == true)
+	{
+		char flag;
+		cout << n << "already exists. Overwrite? (Y/N): ";
+		cin >> flag;
+
+		if (flag == 'N' || flag == 'n')
+		{
+			throw "Cannot save experiment";
+		}
+	}
+
+	// if file doesn't exist (or user chooses to overwrite)
 	ofstream datafile;
 	datafile.open(filename);
 	if (datafile.is_open())
