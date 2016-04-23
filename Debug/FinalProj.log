@@ -1,37 +1,14 @@
-﻿Build started 23/04/2016 16:16:35.
+﻿Build started 23/04/2016 16:28:32.
      1>Project "d:\libraries\documents\visual studio 2013\Projects\FinalProj\FinalProj\FinalProj.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         D:\Program Files\Visual Studio 2013\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Functions.cpp Source.cpp
+         D:\Program Files\Visual Studio 2013\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Functions.cpp
          Functions.cpp
-     1>d:\libraries\documents\visual studio 2013\projects\finalproj\finalproj\functions.cpp(58): error C2511: 'void datans::experiment::saveExperiment(std::string,std::map<std::string,datans::experiment,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>)' : overloaded member function not found in 'datans::experiment'
-                 with
-                 [
-                     _Kty=std::string
-         ,            _Ty=datans::experiment
-                 ]
-                 d:\libraries\documents\visual studio 2013\projects\finalproj\finalproj\header.h(69) : see declaration of 'datans::experiment'
-     1>d:\libraries\documents\visual studio 2013\projects\finalproj\finalproj\functions.cpp(81): error C2679: binary '=' : no operator found which takes a right-hand operand of type 'datans::experiment' (or there is no acceptable conversion)
-                 d:\program files\visual studio 2013\vc\include\xtree(435): could be 'std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>> &std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>::operator =(const std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>> &)'
-                 with
-                 [
-                     _Kty=std::string
-         ,            _Ty=datans::experiment
-                 ]
-                 while trying to match the argument list '(std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>, datans::experiment)'
-                 with
-                 [
-                     _Kty=std::string
-         ,            _Ty=datans::experiment
-                 ]
-     1>d:\libraries\documents\visual studio 2013\projects\finalproj\finalproj\functions.cpp(150): error C2244: 'readExperiment' : unable to match function definition to an existing declaration
-                 d:\libraries\documents\visual studio 2013\projects\finalproj\finalproj\functions.cpp(149) : see declaration of 'readExperiment'
-     1>d:\libraries\documents\visual studio 2013\projects\finalproj\finalproj\functions.cpp(150): fatal error C1903: unable to recover from previous error(s); stopping compilation
-         Generating Code...
-         Compiling...
-         Source.cpp
-         Generating Code...
-     1>Done Building Project "d:\libraries\documents\visual studio 2013\Projects\FinalProj\FinalProj\FinalProj.vcxproj" (Build target(s)) -- FAILED.
+       Link:
+         D:\Program Files\Visual Studio 2013\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.lib" /MACHINE:X86 Debug\Functions.obj
+         Debug\Source.obj
+         FinalProj.vcxproj -> d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.exe
+     1>Done Building Project "d:\libraries\documents\visual studio 2013\Projects\FinalProj\FinalProj\FinalProj.vcxproj" (Build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:01.11
+Time Elapsed 00:00:00.78
