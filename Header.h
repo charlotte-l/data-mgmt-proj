@@ -89,7 +89,7 @@ namespace datans
 		friend void printExperiment(std::string n, std::map<std::string, experiment> u);		// to print experiment to screen
 		void saveExperiment(std::string n, std::map<std::string, experiment> u);				// to save experiments to file
 		friend void addExperiment(std::map<std::string, experiment> u);							// to add experiments by hand
-		friend void readExperiment(std::string n, std::map<std::string, experiment> u);			// to read experiment from a file
+		friend void readExperiment(std::string n, std::map<std::string, experiment> &u);			// to read experiment from a file
 		friend void deleteExperiment(std::string n, std::map<std::string, experiment> u);		// to delete an experiment
 	};
 }

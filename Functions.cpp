@@ -14,8 +14,13 @@ std::vector<std::string> readDir()
 		// print all files and directories in data
 		while (ent = readdir(dir))
 		{
-			filelist.push_back(ent->d_name);
+			// ignore '.' and '..' directory references
+			if ((*ent->d_name) != '.' && (*ent->d_name) != '..')
+			{
+				filelist.push_back(ent->d_name);
+			}
 		}
+
 		closedir(dir);
 		return filelist;
 	}
@@ -193,15 +198,14 @@ void datans::deleteExperiment(std::string n, std::map<std::string, experiment> u
 
 }
 
-void datans::readExperiment(std::string n, std::map<std::string, experiment> u)
+void datans::readExperiment(std::string n, std::map<std::string, experiment> &u)
 {
 	std::ifstream datafile;
 	std::string templine, templine2, buf;
 	std::vector<std::string> tempHeadings;
 	std::vector<string> tempMeasurement;
 	std::vector<measurement*> rowMeasurement;
-
-	datafile.open(n);
+	datafile.open(".//data//" + n);
 	if (datafile.is_open())
 	{
 		// read the first line which will be headings
@@ -229,11 +233,12 @@ void datans::readExperiment(std::string n, std::map<std::string, experiment> u)
 					tempMeasurement.push_back(buf);
 				}
 				rowMeasurement.push_back(addMeasurement(tempMeasurement));
+				tempMeasurement.clear();
 			}
 			tempExp.measurementContainer.push_back(rowMeasurement);
 		}
 		tempHeadings.clear();
-		u[n] = tempExp;
+		u.insert(std::pair<std::string, experiment>(n, tempExp));
 	}
 	datafile.close();
 }

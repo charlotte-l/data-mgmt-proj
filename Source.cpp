@@ -13,6 +13,7 @@ int main()
 	3. display user menu with options to display experiments or add a
 	   new experiment
 	******************************************************************/
+	
 	std::map<std::string, experiment> user;
 	std::vector<std::string> filelist = readDir();
 
@@ -22,7 +23,7 @@ int main()
 	for (auto iter = filelist.begin(); iter != filelist.end(); ++iter)
 	{
 		readExperiment((*iter), user);
-		cout << "Experiment " << (*iter) << "loaded." << endl;
+		cout << "Experiment " << (*iter) << " loaded." << endl;
 	}
 
 	bool menu{ true };
@@ -51,7 +52,7 @@ int main()
 			// print out the current list
 			for (std::map<std::string, experiment>::iterator it = user.begin(); it != user.end(); ++it)
 			{
-				std::cout << it->first;
+				std::cout << it->first << endl;
 			}
 			cin >> nameFlag;
 			printExperiment(nameFlag, user);
@@ -64,14 +65,17 @@ int main()
 			{
 			case 'm':
 				addExperiment(user);
+				break;
 			case 'f':
 				cout << "Enter filename: ";
 				cin >> fileName;
 				readExperiment(fileName, user);
+				break;
 			default:
 				cout << "Input invalid" << endl;
 				break;
 			}
+			break;
 
 		case '3':
 			cout << "Enter name of experiment to delete: ";
@@ -105,6 +109,7 @@ int main()
 
 		default: 
 			cout << "Command not recognised" << endl;
+			break;
 		}
 
 	} while (menu == true);
