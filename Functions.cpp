@@ -4,6 +4,29 @@ using namespace datans;
 
 // function definitions go here
 
+std::vector<std::string> readDir()
+{
+	DIR *dir;
+	struct dirent *ent;
+	vector<std::string> filelist;
+	if ((dir = opendir("./data")))
+	{
+		// print all files and directories in data
+		while (ent = readdir(dir))
+		{
+			filelist.push_back(ent->d_name);
+		}
+		closedir(dir);
+		return filelist;
+	}
+	else
+	{
+		/* could not open directory */
+		perror("Could not open directory");
+		return filelist;
+	}
+}
+
 void stringMeasure::printInfo()
 {
 	cout << value << "  " << date << endl;
@@ -12,7 +35,7 @@ void stringMeasure::printInfo()
 void numMeasure::printInfo()
 {
 	cout << value << "  " << error << "  " << systError << "  " << "  " << date << endl;
-};
+}
 
 // function to test whether file already exists
 bool is_file_exist(std::string &n)
@@ -48,7 +71,7 @@ measurement* datans::addMeasurement(std::vector<std::string> v)
 	}
 }
 
-void experiment::printExperiment()
+void datans::printExperiment(std::string n, std::map<std::string, experiment> u)
 {
 	// iterator so we can iterate through every measurement in the experiment
 	vector<measurement>::iterator it;
@@ -92,7 +115,7 @@ void experiment::saveExperiment(std::string n, std::map<std::string, experiment>
 				// now iterate over the rows of type vector<measurement*>
 				for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
 				{
-					(*meas_it)->printInfo;
+					// print
 				}
 			}
 		}
@@ -163,6 +186,11 @@ void datans::addExperiment(std::map<std::string, experiment> u)
 
 	tempHeadings.clear();
 	u[tempName] = tempExp;
+}
+
+void datans::deleteExperiment(std::string n, std::map<std::string, experiment> u)
+{
+
 }
 
 void datans::readExperiment(std::string n, std::map<std::string, experiment> u)
