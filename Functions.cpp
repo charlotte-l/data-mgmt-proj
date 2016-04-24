@@ -115,7 +115,11 @@ void experiment::saveExperiment(std::string n, std::map<std::string, experiment>
 				// now iterate over the rows of type vector<measurement*>
 				for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
 				{
+<<<<<<< HEAD
 					// print
+=======
+					(*meas_it)->printInfo;
+>>>>>>> 2fa91fc1dec28f0e2e53f02394ac546d128787c7
 				}
 			}
 		}
@@ -188,11 +192,14 @@ void datans::addExperiment(std::map<std::string, experiment> u)
 	u[tempName] = tempExp;
 }
 
+<<<<<<< HEAD
 void datans::deleteExperiment(std::string n, std::map<std::string, experiment> u)
 {
 
 }
 
+=======
+>>>>>>> 2fa91fc1dec28f0e2e53f02394ac546d128787c7
 void datans::readExperiment(std::string n, std::map<std::string, experiment> u)
 {
 	std::ifstream datafile;
