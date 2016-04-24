@@ -86,19 +86,11 @@ namespace datans
 		// a pointer to a nummeasure or stringmeasure. can also be called
 		// by readExperiment (to parse from a file)
 		friend measurement* addMeasurement(std::vector<std::string> v);
-<<<<<<< HEAD
 		friend void printExperiment(std::string n, std::map<std::string, experiment> u);		// to print experiment to screen
 		void saveExperiment(std::string n, std::map<std::string, experiment> u);				// to save experiments to file
 		friend void addExperiment(std::map<std::string, experiment> u);							// to add experiments by hand
 		friend void readExperiment(std::string n, std::map<std::string, experiment> u);			// to read experiment from a file
 		friend void deleteExperiment(std::string n, std::map<std::string, experiment> u);		// to delete an experiment
-=======
-		
-		void printExperiment();		// to print experiment to screen
-		void saveExperiment(std::string n, std::map<std::string, experiment> u);				// to save experiments to file
-		friend void addExperiment(std::map<std::string, experiment> u);							// to add experiments by hand
-		friend void readExperiment(std::string n, std::map<std::string, experiment> u);			// to read experiment from a file
->>>>>>> 2fa91fc1dec28f0e2e53f02394ac546d128787c7
 	};
 }
 
