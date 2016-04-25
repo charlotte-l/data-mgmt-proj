@@ -1,5 +1,6 @@
 #ifndef MY_HEADER
 #define MY_HEADER
+#define NOMINMAX
 
 #include<iostream>
 #include<stdlib.h> // for c style exit
@@ -8,7 +9,10 @@
 #include<sstream>
 #include<ctime>
 #include <ctype.h>
+#include <iterator>
 #include<fstream>
+#include <limits>
+#include <stdio.h>
 #include<map>
 #include"dirent.h"
 
@@ -39,6 +43,9 @@ namespace datans
 	public:
 		virtual ~measurement(){};
 		virtual void printInfo() = 0;	// print out that value
+		virtual double returnError() = 0;
+		virtual double returnValue() = 0;
+		virtual std::string saveInfo() = 0;
 	};
 
 	class numMeasure : public measurement
@@ -54,6 +61,9 @@ namespace datans
 		numMeasure(double v, double e, double se, std::string d) : value(v), error(e), systError(se), date(d) {}
 		~numMeasure() {}
 		void printInfo();
+		std::string saveInfo();
+		double returnError();
+		double returnValue();
 	};
 
 	class stringMeasure : public measurement
@@ -67,6 +77,9 @@ namespace datans
 		stringMeasure(std::string v, std::string d) : value(v), date(d) {}
 		~stringMeasure() {}
 		void printInfo();
+		std::string saveInfo();
+		double returnError();
+		double returnValue();
 	};
 
 	class experiment
@@ -80,17 +93,13 @@ namespace datans
 		experiment(std::string n, std::vector<std::string> v) : name(n) { for (auto iter = v.begin(); iter != v.end(); ++iter) { headings.push_back(*iter); } };
 		~experiment() {}
 
-		double errorCalc();
-		
-		// called by addExperiment function to parse a string and return
-		// a pointer to a nummeasure or stringmeasure. can also be called
-		// by readExperiment (to parse from a file)
+		std::vector<double> errorCalc();
 		friend measurement* addMeasurement(std::vector<std::string> v);
 		friend void printExperiment(std::string n, std::map<std::string, experiment> u);		// to print experiment to screen
-		void saveExperiment(std::string n, std::map<std::string, experiment> u);				// to save experiments to file
-		friend void addExperiment(std::map<std::string, experiment> u);							// to add experiments by hand
-		friend void readExperiment(std::string n, std::map<std::string, experiment> &u);			// to read experiment from a file
-		friend void deleteExperiment(std::string n, std::map<std::string, experiment> u);		// to delete an experiment
+		void saveExperiment();																	// to save experiments to file
+		friend void addExperiment(std::map<std::string, experiment> &u);						// to add experiments by hand
+		friend void readExperiment(std::string n, std::map<std::string, experiment> &u);		// to read experiment from a file
+		friend void deleteExperiment(std::string n, std::map<std::string, experiment> &u);		// to delete an experiment
 	};
 }
 

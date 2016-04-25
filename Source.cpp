@@ -31,7 +31,6 @@ int main()
 	std::string nameFlag;
 	std::string fileName;
 	char addFlag;
-	char deleteFlag;
 	std::map<std::string, experiment>::iterator ptr;
 
 	// user menu
@@ -47,15 +46,24 @@ int main()
 
 		switch (menuFlag)
 		{
-		case '1':
-			cout << "Select an experiment to view: " << endl;
-			// print out the current list
+		case '1':		// printing experiment to console
+			cout << "Select an experiment to view (options: ";
+			// print out the current list of experiments in memory
 			for (std::map<std::string, experiment>::iterator it = user.begin(); it != user.end(); ++it)
 			{
-				std::cout << it->first << endl;
+				std::cout << it->first << ", ";
 			}
+			cout << "\b\b): ";
 			cin >> nameFlag;
-			printExperiment(nameFlag, user);
+			cout << endl;
+			// try-catch to catch improper input
+			try {
+				printExperiment(nameFlag, user);
+			}
+			catch (const char* msg) {
+				cerr << msg << endl;
+				std::cin.clear();
+			}
 			break;
 
 		case '2':
@@ -84,22 +92,12 @@ int main()
 			// check the experiment does exist
 			if (ptr != user.end())
 			{
-				cout << "Confirm deletion of experiment " << fileName << "(Y/N): " << endl;
-				cin >> deleteFlag;
-				if (tolower(deleteFlag) == 'y')
-				{
-					deleteExperiment(fileName, user);
-					break;
-				}
-				else
-				{
-					cout << "Aborting deletion" << endl;
-					break;
-				}
+				deleteExperiment(fileName, user);
+				break;
 			}
 			else
 			{
-				cout << "Could not find experiment" << endl;
+				cout << "Cannot find experiment" << fileName << endl;
 				break;
 			}
 
@@ -109,6 +107,8 @@ int main()
 
 		default: 
 			cout << "Command not recognised" << endl;
+			cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			break;
 		}
 

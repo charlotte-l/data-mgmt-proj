@@ -34,19 +34,89 @@ std::vector<std::string> readDir()
 
 void stringMeasure::printInfo()
 {
-	cout << value << "  " << date << endl;
+	cout << value << "  " << date << "\t";
+}
+
+string stringMeasure::saveInfo()
+{
+	std::string temp = value + " " + date + "\t";
+	return temp;
 }
 
 void numMeasure::printInfo()
 {
-	cout << value << "  " << error << "  " << systError << "  " << "  " << date << endl;
+	cout << value << "  " << error << "  " << systError << "  " << date << "\t";
+}
+
+string numMeasure::saveInfo()
+{
+	std::string temp = to_string(value) + " " + to_string(error) + " " + to_string(systError) + " " + date + "\t";
+	return temp;
+}
+
+double numMeasure::returnError()
+{
+	return error + systError;
+}
+
+double stringMeasure::returnError()
+{
+	// string error is always 0
+	return 0;
+}
+
+double numMeasure::returnValue()
+{
+	return value;
+}
+
+double stringMeasure::returnValue()
+{
+	// string error is always 0
+	return 0;
 }
 
 // function to test whether file already exists
 bool is_file_exist(std::string &n)
 {
-	std::ifstream infile(n);
+	std::ifstream infile(".//data//" + n + ".txt");
 	return infile.good();
+}
+
+vector<double> experiment::errorCalc()
+{
+	// this will be called by printexperiment function
+
+	//std::vector<double> errors;
+	double errors[5];
+	double rowcount{ 0 };
+	int index{ 0 };
+	vector<double> null;
+
+	// iterate over each row in measurementContainer
+	for (auto vec_iter = measurementContainer.begin(); vec_iter != measurementContainer.end(); ++vec_iter)
+	{
+		rowcount++;
+		// now iterate over the measurements within each rows of type vector<measurement*>
+		for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+		{
+			// we need to sum error / value for the COLUMN - so for each element of the row
+			// we will add to the vector error in the same row format
+			index = std::distance((*vec_iter).begin(), meas_it);
+			errors[index] += ((*meas_it)->returnError() / (*meas_it)->returnValue());
+		}
+		cout << endl;
+	}
+
+	/*
+	for (auto iter = errors.begin(); iter != errors.end(); ++iter)
+	{
+		(*iter) = (*iter) / rowcount;
+	}
+
+	return errors;
+	*/
+	return null;
 }
 
 measurement* datans::addMeasurement(std::vector<std::string> v)
@@ -78,21 +148,58 @@ measurement* datans::addMeasurement(std::vector<std::string> v)
 
 void datans::printExperiment(std::string n, std::map<std::string, experiment> u)
 {
-	// iterator so we can iterate through every measurement in the experiment
-	vector<measurement>::iterator it;
+	std::map<std::string, experiment>::iterator ptr;
+	// look for experiment with key n
+	ptr = u.find(n);
 
+	if (ptr != u.end())
+	{
+		// dereference the pointer
+		experiment value = ptr->second;
+
+		// print out the headings first
+		for (auto vec_iter = value.headings.begin(); vec_iter != value.headings.end(); ++vec_iter)
+		{
+			cout << (*vec_iter) << "\t\t";
+		}
+		cout << endl;
+
+		// iterate over each row in measurementContainer
+		for (auto vec_iter = value.measurementContainer.begin(); vec_iter != value.measurementContainer.end(); ++vec_iter)
+		{
+			// now iterate over the measurements within each rows of type vector<measurement*>
+			for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+			{
+				// print info
+				(*meas_it)->printInfo();
+			}
+			cout << endl;
+		}
+
+		// finally print out % error
+		std::vector<double> errors = value.errorCalc();
+		for (auto iter = errors.begin(); iter != errors.end(); ++iter)
+		{
+			if ((*iter) != 0)
+				cout << "% error: " << (*iter) << "\t\t";
+			else
+				cout << "% error: N/A \t\t";
+		}
+	}
+	else
+		throw "Experiment not found";
 }
 
 // function to save experiments to a file
-void experiment::saveExperiment(std::string n, std::map<std::string, experiment> u)
+void experiment::saveExperiment()
 {
-	std::string filename = n + ".txt";		// append .txt to the experiment name
+	std::string filename = name + ".txt";		// append .txt to the experiment name
 	
 	// check if file exists; if so, check if user wants to overwrite or not
-	if (is_file_exist(n) == true)
+	if (is_file_exist(name) == true)
 	{
 		char flag;
-		cout << n << "already exists. Overwrite? (Y/N): ";
+		cout << name << "already exists. Overwrite? (Y/N): ";
 		cin >> flag;
 
 		if (flag == 'N' || flag == 'n')
@@ -103,34 +210,36 @@ void experiment::saveExperiment(std::string n, std::map<std::string, experiment>
 
 	// if file doesn't exist (or user chooses to overwrite)
 	ofstream datafile;
-	datafile.open(filename);
+	datafile.open(".//data//" + filename);
 	if (datafile.is_open())
 	{
-		std::map<std::string, experiment>::iterator ptr;
-		// look for experiment with key n
-		ptr = u.find(n);
-		if (ptr != u.end())
+		// write headings to datafile
+		for (auto vec_iter = headings.begin(); vec_iter != headings.end(); ++vec_iter)
 		{
-			// dereference the pointer
-			experiment value = ptr->second;
+			datafile << (*vec_iter) << "\t";
+		}
+		datafile << endl;
 
-			// iterating over the whole measurement container for the appropriate experiment
-			for (auto vec_iter = value.measurementContainer.begin(); vec_iter != value.measurementContainer.end(); ++vec_iter)
+		// now the actual measurements
+		// iterating over the whole measurement container for the appropriate experiment
+		for (auto vec_iter = measurementContainer.begin(); vec_iter != measurementContainer.end(); ++vec_iter)
+		{
+			// now iterate over the rows of type vector<measurement*>
+			for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
 			{
-				// now iterate over the rows of type vector<measurement*>
-				for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
-				{
-					// print info
-				}
+				// write info to file
+				datafile << (*meas_it)->saveInfo();
 			}
 		}
-		else
-			throw "Could not find experiment";
+
+		datafile.close();
 	}
+	else
+		throw "Could not find experiment";
 }
 
 // function for a user to add an experiment by hand
-void datans::addExperiment(std::map<std::string, experiment> u)
+void datans::addExperiment(std::map<std::string, experiment> &u)
 {
 	std::string tempName, tempHeads, buf;
 	std::vector<std::string> tempHeadings;
@@ -141,7 +250,7 @@ void datans::addExperiment(std::map<std::string, experiment> u)
 	std::cin.ignore();
 
 	// get headings input and split on space delimiter
-	std::cout << "\nEnter headings, space delimited: ";
+	std::cout << "\nEnter headings, space delimited - units in () i.e. Voltage(V): ";
 	std::getline(std::cin, tempHeads);
 	std::stringstream ss(tempHeads);
 	while (ss >> buf)
@@ -190,12 +299,35 @@ void datans::addExperiment(std::map<std::string, experiment> u)
 	} while (flag == 'Y' || flag == 'y');
 
 	tempHeadings.clear();
-	u[tempName] = tempExp;
+	u.insert(std::pair<std::string, experiment>(tempName, tempExp));
+	std::map<std::string, experiment>::iterator ptr = u.find(tempName);
+	tempExp.saveExperiment();
 }
 
-void datans::deleteExperiment(std::string n, std::map<std::string, experiment> u)
+void datans::deleteExperiment(std::string n, std::map<std::string, experiment> &u)
 {
-
+	char deleteFlag;
+	cout << "Confirm deletion of experiment " << n << " (Y/N): " << endl;
+	cin >> deleteFlag;
+	if (tolower(deleteFlag) == 'y')
+	{
+		// create a string to filepath then pass this as a const char * to remove
+		std::string filePath = ".//data//" + n + ".txt";
+		if (remove(filePath.c_str()) != 0)
+			// print error file not found
+			perror("Error deleting data file for experiment");
+		else
+		{
+			// delete the pair from the map
+			u.erase(n);
+			cout << "Experiment deleted successfully" << endl;
+		}
+	}
+	else
+	{
+		cout << "Aborting deletion" << endl;
+		return;
+	}
 }
 
 void datans::readExperiment(std::string n, std::map<std::string, experiment> &u)
