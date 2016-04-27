@@ -22,7 +22,7 @@ int main()
 	// load all existing experiments into memory
 	for (auto iter = filelist.begin(); iter != filelist.end(); ++iter)
 	{
-		readExperiment((*iter), user);
+		readExperiment((*iter), user, 'r');
 		cout << "Experiment " << (*iter) << " loaded." << endl;
 	}
 
@@ -77,7 +77,7 @@ int main()
 			case 'f':
 				cout << "Enter filename: ";
 				cin >> fileName;
-				readExperiment(fileName, user);
+				readExperiment(fileName, user, 'f');
 				break;
 			default:
 				cout << "Input invalid" << endl;

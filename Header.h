@@ -3,6 +3,7 @@
 #define NOMINMAX
 
 #include<iostream>
+#include <iomanip>
 #include<stdlib.h> // for c style exit
 #include<vector>
 #include<string>
@@ -60,10 +61,11 @@ namespace datans
 		numMeasure() : value(0), error(0), systError(0) { date = currentDate(); }
 		numMeasure(double v, double e, double se, std::string d) : value(v), error(e), systError(se), date(d) {}
 		~numMeasure() {}
-		void printInfo();
-		std::string saveInfo();
-		double returnError();
-		double returnValue();
+		void printInfo() { std::cout << std::left << std::setw(5) << value << std::setw(5) << error << std::setw(5) << systError << std::setw(5) << date << std::setw(5); }
+		std::string saveInfo() { std::string temp = std::to_string(value) + " "
+			+ std::to_string(error) + " " + std::to_string(systError) + " " + date + "\t"; return temp; }
+		double returnError() { return error + systError; }
+		double returnValue() { return value; }
 	};
 
 	class stringMeasure : public measurement
@@ -76,10 +78,10 @@ namespace datans
 		stringMeasure() : value("null") { date = currentDate();  }
 		stringMeasure(std::string v, std::string d) : value(v), date(d) {}
 		~stringMeasure() {}
-		void printInfo();
-		std::string saveInfo();
-		double returnError();
-		double returnValue();
+		void printInfo() { std::cout << std::left << std::setw(5) << value << std::setw(5) << date << std::setw(5); }
+		std::string saveInfo() { std::string temp = value + " " + date + "\t"; return temp; }
+		double returnError() { return 0; }
+		double returnValue() { return 0; } // this function is only called in error calculation and so returns 0
 	};
 
 	class experiment
@@ -98,7 +100,7 @@ namespace datans
 		friend void printExperiment(std::string n, std::map<std::string, experiment> u);		// to print experiment to screen
 		void saveExperiment();																	// to save experiments to file
 		friend void addExperiment(std::map<std::string, experiment> &u);						// to add experiments by hand
-		friend void readExperiment(std::string n, std::map<std::string, experiment> &u);		// to read experiment from a file
+		friend void readExperiment(std::string n, std::map<std::string, experiment> &u, char flag);		// to read experiment from a file - flag determines filepath
 		friend void deleteExperiment(std::string n, std::map<std::string, experiment> &u);		// to delete an experiment
 	};
 }

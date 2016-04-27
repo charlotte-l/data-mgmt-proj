@@ -32,50 +32,6 @@ std::vector<std::string> readDir()
 	}
 }
 
-void stringMeasure::printInfo()
-{
-	cout << value << "  " << date << "\t";
-}
-
-string stringMeasure::saveInfo()
-{
-	std::string temp = value + " " + date + "\t";
-	return temp;
-}
-
-void numMeasure::printInfo()
-{
-	cout << value << "  " << error << "  " << systError << "  " << date << "\t";
-}
-
-string numMeasure::saveInfo()
-{
-	std::string temp = to_string(value) + " " + to_string(error) + " " + to_string(systError) + " " + date + "\t";
-	return temp;
-}
-
-double numMeasure::returnError()
-{
-	return error + systError;
-}
-
-double stringMeasure::returnError()
-{
-	// string error is always 0
-	return 0;
-}
-
-double numMeasure::returnValue()
-{
-	return value;
-}
-
-double stringMeasure::returnValue()
-{
-	// string error is always 0
-	return 0;
-}
-
 // function to test whether file already exists
 bool is_file_exist(std::string &n)
 {
@@ -160,7 +116,7 @@ void datans::printExperiment(std::string n, std::map<std::string, experiment> u)
 		// print out the headings first
 		for (auto vec_iter = value.headings.begin(); vec_iter != value.headings.end(); ++vec_iter)
 		{
-			cout << (*vec_iter) << "\t\t";
+			cout << std::left << ::setw(20) << (*vec_iter);
 		}
 		cout << endl;
 
@@ -172,6 +128,7 @@ void datans::printExperiment(std::string n, std::map<std::string, experiment> u)
 			{
 				// print info
 				(*meas_it)->printInfo();
+				std::cout << "\t";
 			}
 			cout << endl;
 		}
@@ -199,7 +156,7 @@ void experiment::saveExperiment()
 	if (is_file_exist(name) == true)
 	{
 		char flag;
-		cout << name << "already exists. Overwrite? (Y/N): ";
+		cout << "File " << filename << " already exists. Overwrite? (Y/N): ";
 		cin >> flag;
 
 		if (flag == 'N' || flag == 'n')
@@ -300,8 +257,13 @@ void datans::addExperiment(std::map<std::string, experiment> &u)
 
 	tempHeadings.clear();
 	u.insert(std::pair<std::string, experiment>(tempName, tempExp));
-	std::map<std::string, experiment>::iterator ptr = u.find(tempName);
-	tempExp.saveExperiment();
+	
+	try {
+		tempExp.saveExperiment();
+	}
+	catch (const char* msg) {
+		cerr << msg << endl;
+	}
 }
 
 void datans::deleteExperiment(std::string n, std::map<std::string, experiment> &u)
@@ -330,14 +292,26 @@ void datans::deleteExperiment(std::string n, std::map<std::string, experiment> &
 	}
 }
 
-void datans::readExperiment(std::string n, std::map<std::string, experiment> &u)
+void datans::readExperiment(std::string n, std::map<std::string, experiment> &u, char flag)
 {
 	std::ifstream datafile;
-	std::string templine, templine2, buf;
+	std::string templine, templine2, buf, filePath;
 	std::vector<std::string> tempHeadings;
 	std::vector<string> tempMeasurement;
 	std::vector<measurement*> rowMeasurement;
-	datafile.open(".//data//" + n);
+
+	if (flag == 'r')
+	{
+		datafile.open(".//data//" + n);
+	}
+
+	else if (flag == 'f')
+	{
+		cout << "Enter filepath to file location (i.e. C://datafiles// - N.B double slash!): ";
+		cin >> filePath;
+		datafile.open(filePath + n);
+	}
+
 	if (datafile.is_open())
 	{
 		// read the first line which will be headings
@@ -371,6 +345,10 @@ void datans::readExperiment(std::string n, std::map<std::string, experiment> &u)
 		}
 		tempHeadings.clear();
 		u.insert(std::pair<std::string, experiment>(n, tempExp));
+		datafile.close();
 	}
-	datafile.close();
+	else
+	{
+		cout << "Could not find or read file " << n << endl;
+	}
 }
