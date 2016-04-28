@@ -32,7 +32,7 @@ int main()
 	std::string fileName;
 	char addFlag;
 	std::map<std::string, experiment>::iterator ptr;
-
+	
 	// user menu
 	cout << "Welcome to DataManager. Select an option:" << endl;
 	do
@@ -42,8 +42,8 @@ int main()
 		cout << "[3]. Delete experiment " << endl;
 		cout << "[4]. Exit" << endl;
 
-		cout << "Option: "; cin >> menuFlag; cout << endl;
-
+		cout << "Option: "; cin >> menuFlag; cin.ignore(); cout << endl;
+		
 		switch (menuFlag)
 		{
 		case '1':		// printing experiment to console
@@ -54,8 +54,9 @@ int main()
 				std::cout << it->first << ", ";
 			}
 			cout << "\b\b): ";
-			cin >> nameFlag;
+			getline(cin, nameFlag);
 			cout << endl;
+			
 			// try-catch to catch improper input
 			try {
 				printExperiment(nameFlag, user);
@@ -65,10 +66,11 @@ int main()
 				std::cin.clear();
 			}
 			break;
-
+			
 		case '2':
 			cout << "Add experiment [m]anually or from [f]ile: ";
 			cin >> addFlag;
+			cin.ignore();
 			switch (tolower(addFlag))
 			{
 			case 'm':
@@ -110,9 +112,10 @@ int main()
 			cin.clear();
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			break;
+			
 		}
-
+		
 	} while (menu == true);
-
+	
 	return 0;
 }

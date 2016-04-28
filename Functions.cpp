@@ -39,6 +39,19 @@ bool is_file_exist(std::string &n)
 	return infile.good();
 }
 
+
+// rvalue move constructor for efficient moving
+experiment::experiment(experiment&& e)
+{
+	headings = e.headings;
+	measurementContainer = std::move(e.measurementContainer);
+	name = e.name;
+
+	e.headings.clear();
+	e.measurementContainer.clear();
+	e.name = "";
+}
+
 vector<double> experiment::errorCalc()
 {
 	// this will be called by printexperiment function
@@ -54,7 +67,7 @@ vector<double> experiment::errorCalc()
 	{
 		rowcount++;
 		// now iterate over the measurements within each rows of type vector<measurement*>
-		for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+		for (vector<std::shared_ptr<measurement>>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
 		{
 			// we need to sum error / value for the COLUMN - so for each element of the row
 			// we will add to the vector error in the same row format
@@ -64,18 +77,10 @@ vector<double> experiment::errorCalc()
 		cout << endl;
 	}
 
-	/*
-	for (auto iter = errors.begin(); iter != errors.end(); ++iter)
-	{
-		(*iter) = (*iter) / rowcount;
-	}
-
-	return errors;
-	*/
 	return null;
 }
 
-measurement* datans::addMeasurement(std::vector<std::string> v)
+std::shared_ptr<measurement> datans::addMeasurement(std::vector<std::string> v)
 {
 	int vectorSize = v.size();
 	if (vectorSize == 4)
@@ -85,15 +90,12 @@ measurement* datans::addMeasurement(std::vector<std::string> v)
 		double temperr = stod(v[1]);
 		double tempsyst = stod(v[2]);
 		// create the measurement
-		measurement *ptr;
-		ptr = new numMeasure(tempval, temperr, tempsyst, v[3]);
+		std::shared_ptr<measurement> ptr (new numMeasure(tempval, temperr, tempsyst, v[3]));
 		return ptr;
 	}
-
 	else if (vectorSize == 2)
 	{
-		measurement *ptr;
-		ptr = new stringMeasure(v[0], v[1]);
+		std::shared_ptr<measurement> ptr (new stringMeasure(v[0], v[1]));
 		return ptr;
 	}
 	else
@@ -107,24 +109,21 @@ void datans::printExperiment(std::string n, std::map<std::string, experiment> u)
 	std::map<std::string, experiment>::iterator ptr;
 	// look for experiment with key n
 	ptr = u.find(n);
-
+	
 	if (ptr != u.end())
 	{
-		// dereference the pointer
-		experiment value = ptr->second;
-
 		// print out the headings first
-		for (auto vec_iter = value.headings.begin(); vec_iter != value.headings.end(); ++vec_iter)
+		for (auto vec_iter = (ptr->second).headings.begin(); vec_iter != (ptr->second).headings.end(); ++vec_iter)
 		{
 			cout << std::left << ::setw(20) << (*vec_iter);
 		}
 		cout << endl;
 
 		// iterate over each row in measurementContainer
-		for (auto vec_iter = value.measurementContainer.begin(); vec_iter != value.measurementContainer.end(); ++vec_iter)
+		for (auto vec_iter = (ptr->second).measurementContainer.begin(); vec_iter != (ptr->second).measurementContainer.end(); ++vec_iter)
 		{
 			// now iterate over the measurements within each rows of type vector<measurement*>
-			for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+			for (vector<std::shared_ptr<measurement>>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
 			{
 				// print info
 				(*meas_it)->printInfo();
@@ -132,9 +131,9 @@ void datans::printExperiment(std::string n, std::map<std::string, experiment> u)
 			}
 			cout << endl;
 		}
-
+		
 		// finally print out % error
-		std::vector<double> errors = value.errorCalc();
+		std::vector<double> errors = (ptr->second).errorCalc();
 		for (auto iter = errors.begin(); iter != errors.end(); ++iter)
 		{
 			if ((*iter) != 0)
@@ -144,7 +143,7 @@ void datans::printExperiment(std::string n, std::map<std::string, experiment> u)
 		}
 	}
 	else
-		throw "Experiment not found";
+		throw "Experiment not found";		
 }
 
 // function to save experiments to a file
@@ -179,16 +178,18 @@ void experiment::saveExperiment()
 
 		// now the actual measurements
 		// iterating over the whole measurement container for the appropriate experiment
-		for (auto vec_iter = measurementContainer.begin(); vec_iter != measurementContainer.end(); ++vec_iter)
+		
+		for (auto& vec_iter = measurementContainer.begin(); vec_iter != measurementContainer.end(); ++vec_iter)
+		//for (auto vec_iter = measurementContainer.begin(); vec_iter != measurementContainer.end(); ++vec_iter)
 		{
 			// now iterate over the rows of type vector<measurement*>
-			for (vector<measurement*>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+			for (auto& meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+			//for (vector<shared_ptr<measurement>>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
 			{
 				// write info to file
 				datafile << (*meas_it)->saveInfo();
 			}
 		}
-
 		datafile.close();
 	}
 	else
@@ -203,8 +204,7 @@ void datans::addExperiment(std::map<std::string, experiment> &u)
 
 	// get experiment name
 	std::cout << "Enter experiment name: ";
-	std::cin >> tempName;
-	std::cin.ignore();
+	std::getline(std::cin, tempName);
 
 	// get headings input and split on space delimiter
 	std::cout << "\nEnter headings, space delimited - units in () i.e. Voltage(V): ";
@@ -217,13 +217,13 @@ void datans::addExperiment(std::map<std::string, experiment> &u)
 
 	// create experiment with desired name and headings, then clean up
 	experiment tempExp(tempName, tempHeadings);
-
+	
 	char flag('y');
 	std::string tempdata;
 	std::vector<string> tempMeasurement;
-	std::vector<measurement*> rowMeasurement;
+	std::vector<std::shared_ptr<measurement>> rowMeasurement;
 	static int counter{ 0 };
-
+	
 	do
 	{
 		for (unsigned int i = 0; i < tempHeadings.size(); ++i)
@@ -238,25 +238,24 @@ void datans::addExperiment(std::map<std::string, experiment> &u)
 					tempMeasurement.push_back(buf);
 				}
 				// call function to create measurement object from the tempMeasurement vector
-				rowMeasurement.push_back(addMeasurement(tempMeasurement));
+				rowMeasurement.push_back(std::move(addMeasurement(tempMeasurement)));
 				tempMeasurement.clear();
 			}
 			catch (const char* msg) {
 				cerr << msg << endl;
 				std::cin.clear();
 			}
-			tempExp.measurementContainer.push_back(rowMeasurement);
+			// THIS LINE IS (maybe) BROKEN
+			tempExp.measurementContainer.emplace_back(std::move(rowMeasurement));
+			// THIS LINE IS (maybe) BROKEN
 			rowMeasurement.clear();
 		}
 		counter++;
 		cout << "Continue to add data? (Current rows: " << counter << ") (Y/N): ";
 		cin >> flag;
 		cin.ignore();
-
+		
 	} while (flag == 'Y' || flag == 'y');
-
-	tempHeadings.clear();
-	u.insert(std::pair<std::string, experiment>(tempName, tempExp));
 	
 	try {
 		tempExp.saveExperiment();
@@ -264,6 +263,8 @@ void datans::addExperiment(std::map<std::string, experiment> &u)
 	catch (const char* msg) {
 		cerr << msg << endl;
 	}
+	u.insert(std::make_pair(tempName, std::move(tempExp)));
+	
 }
 
 void datans::deleteExperiment(std::string n, std::map<std::string, experiment> &u)
@@ -298,7 +299,7 @@ void datans::readExperiment(std::string n, std::map<std::string, experiment> &u,
 	std::string templine, templine2, buf, filePath;
 	std::vector<std::string> tempHeadings;
 	std::vector<string> tempMeasurement;
-	std::vector<measurement*> rowMeasurement;
+	std::vector<shared_ptr<measurement>> rowMeasurement;
 
 	if (flag == 'r')
 	{
@@ -338,17 +339,18 @@ void datans::readExperiment(std::string n, std::map<std::string, experiment> &u,
 				{
 					tempMeasurement.push_back(buf);
 				}
-				rowMeasurement.push_back(addMeasurement(tempMeasurement));
+				rowMeasurement.push_back(std::move(addMeasurement(tempMeasurement)));
 				tempMeasurement.clear();
 			}
-			tempExp.measurementContainer.push_back(rowMeasurement);
+			tempExp.measurementContainer.emplace_back(std::move(rowMeasurement));
 		}
 		tempHeadings.clear();
-		u.insert(std::pair<std::string, experiment>(n, tempExp));
+		u.insert(std::make_pair(n, std::move(tempExp)));
 		datafile.close();
 	}
 	else
 	{
 		cout << "Could not find or read file " << n << endl;
 	}
+
 }
