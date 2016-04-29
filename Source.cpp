@@ -22,8 +22,9 @@ int main()
 	// load all existing experiments into memory
 	for (auto iter = filelist.begin(); iter != filelist.end(); ++iter)
 	{
-		readExperiment((*iter), user, 'r');
-		cout << "Experiment " << (*iter) << " loaded." << endl;
+		int check = readExperiment((*iter), user, 'r');
+		if (check == 1)
+			cout << "Experiment " << (*iter) << " loaded." << endl;
 	}
 
 	bool menu{ true };
@@ -32,6 +33,7 @@ int main()
 	std::string fileName;
 	char addFlag;
 	std::map<std::string, experiment>::iterator ptr;
+	int check;
 	
 	// user menu
 	cout << "Welcome to DataManager. Select an option:" << endl;
@@ -79,7 +81,17 @@ int main()
 			case 'f':
 				cout << "Enter filename: ";
 				cin >> fileName;
-				readExperiment(fileName, user, 'f');
+				// check if a file with that name already exists
+				if (std::find(filelist.begin(), filelist.end(), fileName) != filelist.end())
+				{
+					cout << "Experiment with this name already exists!" << endl;
+				}
+				else
+				{
+					check = readExperiment(fileName, user, 'f');
+					if (check == 1)
+						cout << "Experiment " << fileName << " loaded successfully." << endl;
+				}
 				break;
 			default:
 				cout << "Input invalid" << endl;
@@ -88,7 +100,12 @@ int main()
 			break;
 
 		case '3':
-			cout << "Enter name of experiment to delete: ";
+			cout << "Enter name of experiment to delete (options: ";
+			for (std::map<std::string, experiment>::iterator it = user.begin(); it != user.end(); ++it)
+			{
+				std::cout << it->first << ", ";
+			}
+			cout << "\b\b): ";
 			cin >> fileName;
 			ptr = user.find(fileName);
 			// check the experiment does exist

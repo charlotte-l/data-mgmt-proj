@@ -16,6 +16,7 @@
 #include <limits>
 #include <stdio.h>
 #include<map>
+#include <algorithm>
 #include"dirent.h"
 
 //prototype for directory reading function
@@ -43,7 +44,7 @@ namespace datans
 	class measurement
 	{
 	public:
-		virtual ~measurement(){ std::cout << "measurement desctructor called"; };
+		virtual ~measurement(){};
 		virtual void printInfo() = 0;	// print out that value
 		virtual double returnError() = 0;
 		virtual double returnValue() = 0;
@@ -59,9 +60,9 @@ namespace datans
 		double systError;
 		std::string date;
 	public:
-		numMeasure() : value(0), error(0), systError(0) { date = currentDate(); std::cout << "numMeasure default constructor called\n"; }
-		numMeasure(double v, double e, double se, std::string d) : value(v), error(e), systError(se), date(d) { std::cout << "numMeasure param constructor called\n"; }
-		~numMeasure() { std::cout << "numMeasure destructor called\n"; }
+		numMeasure() : value(0), error(0), systError(0) { date = currentDate(); }
+		numMeasure(double v, double e, double se, std::string d) : value(v), error(e), systError(se), date(d) {}
+		~numMeasure() {}
 		void printInfo() { std::cout << std::left << std::setw(5) << value << std::setw(5) << error << std::setw(5) << systError << std::setw(5) << date << std::setw(5); }
 		std::string saveInfo() { std::string temp = std::to_string(value) + " "
 			+ std::to_string(error) + " " + std::to_string(systError) + " " + date + "\t"; return temp; }
@@ -76,9 +77,9 @@ namespace datans
 		std::string value;
 		std::string date;
 	public:
-		stringMeasure() : value("null") { date = currentDate(); std::cout << "stringMeasure default constructor called\n"; }
-		stringMeasure(std::string v, std::string d) : value(v), date(d) { std::cout << "stringMeasure param constructor called\n"; }
-		~stringMeasure() { std::cout << "stringMeasure destructor called\n"; }
+		stringMeasure() : value("null") { date = currentDate(); }
+		stringMeasure(std::string v, std::string d) : value(v), date(d) {}
+		~stringMeasure() {}
 		void printInfo() { std::cout << std::left << std::setw(5) << value << std::setw(5) << date << std::setw(5); }
 		std::string saveInfo() { std::string temp = value + " " + date + "\t"; return temp; }
 		double returnError() { return 0; }
@@ -89,13 +90,13 @@ namespace datans
 	{
 	private:
 		std::vector<std::string> headings;
+		std::vector<std::string> dataHeadings;
 		std::vector < std::vector<std::shared_ptr<measurement>> > measurementContainer;
 		std::string name;
 	public:
-		experiment() : name("null") { headings.push_back("null"); std::cout << "experiment default constructor called\n"; }
-		experiment(std::string n, std::vector<std::string> v) : name(n) { for (auto iter = v.begin(); iter != v.end(); ++iter) { headings.push_back(*iter); }
-			std::cout << "experiment param constructor called\n"; };
-		~experiment() { std::cout << "experiment object " << name << " destructor called\n"; }
+		experiment() : name("null") { headings.push_back("null"); }
+		experiment(std::string n, std::vector<std::string> v) : name(n) { for (auto iter = v.begin(); iter != v.end(); ++iter) { headings.push_back(*iter); } };
+		~experiment() {}
 
 		// move constructor - prototyped, function in Functions.cpp, used in addExperiment
 		experiment(experiment&& e);
@@ -107,7 +108,7 @@ namespace datans
 		friend void printExperiment(std::string n, std::map<std::string, experiment> u);				// to print experiment to screen
 		void saveExperiment();																			// to save experiments to file
 		friend void addExperiment(std::map<std::string, experiment> &u);								// to add experiments by hand
-		friend void readExperiment(std::string n, std::map<std::string, experiment> &u, char flag);		// to read experiment from a file - flag determines filepath
+		friend int readExperiment(std::string n, std::map<std::string, experiment> &u, char flag);		// to read experiment from a file - flag determines filepath
 		friend void deleteExperiment(std::string n, std::map<std::string, experiment> &u);				// to delete an experiment
 	};
 }
