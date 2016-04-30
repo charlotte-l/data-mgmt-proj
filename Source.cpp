@@ -14,13 +14,13 @@ int main()
 	   new experiment
 	******************************************************************/
 	
-	std::map<std::string, experiment> user;
-	std::vector<std::string> filelist = readDir();
+	std::map<std::string, Experiment> user;
+	std::vector<std::string> fileList = readDir();
 
 	cout << "Loading previous experiments..." << endl;
 
 	// load all existing experiments into memory
-	for (auto iter = filelist.begin(); iter != filelist.end(); ++iter)
+	for (auto iter = fileList.begin(); iter != fileList.end(); ++iter)
 	{
 		int check = readExperiment((*iter), user, 'r');
 		if (check == 1)
@@ -29,11 +29,11 @@ int main()
 
 	bool menu{ true };
 	char menuFlag;
-	std::string nameFlag;
-	std::string fileName;
 	char addFlag;
-	std::map<std::string, experiment>::iterator ptr;
 	int check;
+	std::string nameFlag;
+	std::map<std::string, Experiment>::iterator ptr;
+	
 	
 	// user menu
 	cout << "Welcome to DataManager. Select an option:" << endl;
@@ -41,17 +41,17 @@ int main()
 	{
 		cout << endl << "[1]. Display experiment" << endl;
 		cout << "[2]. Add experiment" << endl;
-		cout << "[3]. Delete experiment " << endl;
-		cout << "[4]. Exit" << endl;
+		cout << "[3]. Edit experiment" << endl;
+		cout << "[4]. Delete experiment " << endl;
+		cout << "[5]. Exit" << endl;
 
 		cout << "Option: "; cin >> menuFlag; cin.ignore(); cout << endl;
-		
 		switch (menuFlag)
 		{
 		case '1':		// printing experiment to console
 			cout << "Select an experiment to view (options: ";
 			// print out the current list of experiments in memory
-			for (std::map<std::string, experiment>::iterator it = user.begin(); it != user.end(); ++it)
+			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
 			{
 				std::cout << it->first << ", ";
 			}
@@ -59,13 +59,11 @@ int main()
 			getline(cin, nameFlag);
 			cout << endl;
 			
-			// try-catch to catch improper input
-			try {
-				printExperiment(nameFlag, user);
-			}
-			catch (const char* msg) {
-				cerr << msg << endl;
-				std::cin.clear();
+			// pseudo exception handling for invalid input
+			check = printExperiment(nameFlag, user);
+			if (check != 1)
+			{
+				cout << "Experiment " << nameFlag << " could not be found" << endl;
 			}
 			break;
 			
@@ -79,18 +77,18 @@ int main()
 				addExperiment(user);
 				break;
 			case 'f':
-				cout << "Enter filename: ";
-				cin >> fileName;
+				cout << "Enter filename (i.e. data.txt): ";
+				cin >> nameFlag;
 				// check if a file with that name already exists
-				if (std::find(filelist.begin(), filelist.end(), fileName) != filelist.end())
+				if (std::find(fileList.begin(), fileList.end(), nameFlag) != fileList.end())
 				{
 					cout << "Experiment with this name already exists!" << endl;
 				}
 				else
 				{
-					check = readExperiment(fileName, user, 'f');
+					check = readExperiment(nameFlag, user, 'f');
 					if (check == 1)
-						cout << "Experiment " << fileName << " loaded successfully." << endl;
+						cout << "Experiment " << nameFlag << " loaded successfully." << endl;
 				}
 				break;
 			default:
@@ -100,27 +98,44 @@ int main()
 			break;
 
 		case '3':
-			cout << "Enter name of experiment to delete (options: ";
-			for (std::map<std::string, experiment>::iterator it = user.begin(); it != user.end(); ++it)
+			cout << "Select an experiment to edit (options: ";
+			// print out the current list of experiments in memory
+			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
 			{
 				std::cout << it->first << ", ";
 			}
 			cout << "\b\b): ";
-			cin >> fileName;
-			ptr = user.find(fileName);
+			getline(cin, nameFlag);
+
+			check = editExperiment(nameFlag, user);
+			if (check != 1)
+			{
+				cout << "Experiment " << nameFlag << " could not be found" << endl;
+			}
+			break;
+
+		case '4':
+			cout << "Enter name of experiment to delete (options: ";
+			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
+			{
+				std::cout << it->first << ", ";
+			}
+			cout << "\b\b): ";
+			cin >> nameFlag;
+			ptr = user.find(nameFlag);
 			// check the experiment does exist
 			if (ptr != user.end())
 			{
-				deleteExperiment(fileName, user);
+				deleteExperiment(nameFlag, user);
 				break;
 			}
 			else
 			{
-				cout << "Cannot find experiment" << fileName << endl;
+				cout << "Cannot find experiment" << nameFlag << endl;
 				break;
 			}
 
-		case '4':
+		case '5':
 			menu = false;
 			break;
 
@@ -128,10 +143,8 @@ int main()
 			cout << "Command not recognised" << endl;
 			cin.clear();
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-			break;
-			
+			break;		
 		}
-		
 	} while (menu == true);
 	
 	return 0;

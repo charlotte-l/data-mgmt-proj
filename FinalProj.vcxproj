@@ -77,7 +77,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Functions.cpp" />
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Source.cpp">
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ShowIncludes>
+    </ClCompile>
+    <ClCompile Include="measurementFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dirent.h" />

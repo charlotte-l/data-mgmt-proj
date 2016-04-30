@@ -3,20 +3,16 @@
 #define NOMINMAX
 
 #include<iostream>
-#include <iomanip>
-#include<stdlib.h> // for c style exit
+#include<iomanip>
 #include<vector>
 #include<string>
 #include<sstream>
-#include<ctime>
-#include <ctype.h>
-#include <iterator>
-#include <memory>
 #include<fstream>
-#include <limits>
-#include <stdio.h>
+#include<ctime>
+#include<iterator>
+#include<memory>
 #include<map>
-#include <algorithm>
+#include<algorithm>
 #include"dirent.h"
 
 //prototype for directory reading function
@@ -39,77 +35,75 @@ namespace
 
 namespace datans
 {
-	// all class definitions go here
-
-	class measurement
+	class Measurement
 	{
 	public:
-		virtual ~measurement(){};
-		virtual void printInfo() = 0;	// print out that value
-		virtual double returnError() = 0;
-		virtual double returnValue() = 0;
+		virtual ~Measurement(){};
+		virtual void printInfo() = 0;
 		virtual std::string saveInfo() = 0;
+		virtual double getError() = 0;
+		virtual double getValue() = 0;
+		virtual int updateInfo(std::vector<std::string> &v) = 0;
 	};
 
-	class numMeasure : public measurement
+	class NumMeasure : public Measurement
 	{
 	private:
-		// numerical values will also have error and systematic errors
-		double value;
-		double error;
-		double systError;
-		std::string date;
+		double value_;
+		double error_;
+		double systError_;
+		std::string date_;
 	public:
-		numMeasure() : value(0), error(0), systError(0) { date = currentDate(); }
-		numMeasure(double v, double e, double se, std::string d) : value(v), error(e), systError(se), date(d) {}
-		~numMeasure() {}
-		void printInfo() { std::cout << std::left << std::setw(5) << value << std::setw(5) << error << std::setw(5) << systError << std::setw(5) << date << std::setw(5); }
-		std::string saveInfo() { std::string temp = std::to_string(value) + " "
-			+ std::to_string(error) + " " + std::to_string(systError) + " " + date + "\t"; return temp; }
-		double returnError() { return error + systError; }
-		double returnValue() { return value; }
+		NumMeasure() : value_(0), error_(0), systError_(0) { date_ = currentDate(); }
+		NumMeasure(double value, double error, double systError, std::string date) : value_(value), error_(error), systError_(systError), date_(date) {}
+		~NumMeasure() {}
+		void printInfo();
+		std::string saveInfo();
+		double getError() { return error_ + systError_; }
+		double getValue() { return value_; }
+		int updateInfo(std::vector<std::string> &v);
 	};
 
-	class stringMeasure : public measurement
+	class StringMeasure : public Measurement
 	{
 	private:
-		// string type measurements will not have any error attributed to them
-		std::string value;
-		std::string date;
+		std::string value_;
+		std::string date_;
+		char dateflag_;
 	public:
-		stringMeasure() : value("null") { date = currentDate(); }
-		stringMeasure(std::string v, std::string d) : value(v), date(d) {}
-		~stringMeasure() {}
-		void printInfo() { std::cout << std::left << std::setw(5) << value << std::setw(5) << date << std::setw(5); }
-		std::string saveInfo() { std::string temp = value + " " + date + "\t"; return temp; }
-		double returnError() { return 0; }
-		double returnValue() { return 0; } // this function is only called in error calculation and so returns 0
+		StringMeasure() : value_("null") { date_ = currentDate(); }
+		StringMeasure(std::string value, std::string date) : value_(value), date_(date){};
+		~StringMeasure(){}
+		void printInfo();
+		std::string saveInfo();
+		double getError() { return 0; }
+		double getValue() { return 0; } // this function is only called in error calculation and so returns 0
+		int updateInfo(std::vector<std::string> &v);
 	};
 
-	class experiment
+	class Experiment
 	{
 	private:
-		std::vector<std::string> headings;
-		std::vector<std::string> dataHeadings;
-		std::vector < std::vector<std::shared_ptr<measurement>> > measurementContainer;
-		std::string name;
+		std::vector<std::string> headings_;
+		std::vector<std::string> dataHeadings_;
+		std::vector < std::vector<std::shared_ptr<Measurement>> > measurementContainer_;
+		std::string name_;
 	public:
-		experiment() : name("null") { headings.push_back("null"); }
-		experiment(std::string n, std::vector<std::string> v) : name(n) { for (auto iter = v.begin(); iter != v.end(); ++iter) { headings.push_back(*iter); } };
-		~experiment() {}
+		Experiment() : name_("null") { headings_.push_back("null"); }
+		Experiment(std::string name, std::vector<std::string> v);
+		~Experiment() {}
 
-		// move constructor - prototyped, function in Functions.cpp, used in addExperiment
-		experiment(experiment&& e);
-		// assignment operator - used in printExperiment
-
+		// move constructor
+		Experiment(Experiment&& e);
 
 		std::vector<double> errorCalc();
-		friend std::shared_ptr<measurement> addMeasurement(std::vector<std::string> v);
-		friend void printExperiment(std::string n, std::map<std::string, experiment> u);				// to print experiment to screen
-		void saveExperiment();																			// to save experiments to file
-		friend void addExperiment(std::map<std::string, experiment> &u);								// to add experiments by hand
-		friend int readExperiment(std::string n, std::map<std::string, experiment> &u, char flag);		// to read experiment from a file - flag determines filepath
-		friend void deleteExperiment(std::string n, std::map<std::string, experiment> &u);				// to delete an experiment
+		friend std::shared_ptr<Measurement> addMeasurement(std::vector<std::string> v);
+		friend int readExperiment(std::string &n, std::map<std::string, Experiment> &u, char readFlag);		// flag determines filepath
+		friend int addExperiment(std::map<std::string, Experiment> &u);
+		friend int printExperiment(std::string &n, std::map<std::string, Experiment> u);
+		friend int editExperiment(std::string &n, std::map<std::string, Experiment> u);
+		int saveExperiment();
+		friend int deleteExperiment(std::string &n, std::map<std::string, Experiment> &u);
 	};
 }
 
