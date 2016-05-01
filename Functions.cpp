@@ -169,11 +169,11 @@ int datans::readExperiment(std::string &n, std::map<std::string, Experiment> &u,
 				{
 					if (tempMeasurement.size() == 4)
 					{
-						tempDataHeadings[colCount] = "Val  Err  SEerr  Date";
+						tempDataHeadings[colCount] = "Val    Err    SEerr  Date        ";
 					}
 					else
 					{
-						tempDataHeadings[colCount] = "Val  Date";
+						tempDataHeadings[colCount] = "Val                 Date        ";
 					}
 				}
 				else
@@ -265,11 +265,11 @@ int datans::addExperiment(std::map<std::string, Experiment> &u)
 				{
 					if (tempMeasurement.size() == 4)
 					{
-						tempDataHeadings[i] = "Value  Err  Systerr  Date";
+						tempDataHeadings[i] = "Value   Err   Systerr   Date";
 					}
 					else
 					{
-						tempDataHeadings[i] = "Value  Date";
+						tempDataHeadings[i] = "Value    Date";
 					}
 				}
 				else
@@ -319,26 +319,34 @@ int datans::printExperiment(std::string &n, std::map<std::string, Experiment> u)
 	ptr = u.find(n);
 	if (ptr != u.end())
 	{
+		const char seperator = ' ';
+		const int width = WIDTH;
+
+		std::cout << "   ";
+		// print out header numbers
 		for (unsigned int i = 0; i < (ptr->second).headings_.size(); ++i)
 		{
-			std::cout << "  " << std::left << std::setw(20) << i+1;
+			std::cout << std::left << std::setw(width) << setfill(seperator) << i+1;
 		}
 		std::cout << endl;
 
-		// print out the headings first
-		for_each((ptr->second).headings_.begin(), (ptr->second).headings_.end(), [](std::string h)
+		std::cout << "   ";
+		// print out the headings
+		for_each((ptr->second).headings_.begin(), (ptr->second).headings_.end(), [width, seperator](std::string h)
 		{
-			std::cout << "  " << std::left << std::setw(20) << h;
+			std::cout << std::left << std::setw(width) << setfill(seperator) << h;
 		});
 		std::cout << endl;
 
-		// now print out under each heading a column title based on the first element
-		for_each((ptr->second).dataHeadings_.begin(), (ptr->second).dataHeadings_.end(), [](std::string h)
+		std::cout << "   ";
+		// print out column titles
+		for_each((ptr->second).dataHeadings_.begin(), (ptr->second).dataHeadings_.end(), [width, seperator](std::string h)
 		{
-			std::cout << "  " << std::left << std::setw(20) << h << std::setw(10) << "\t";
+			std::cout << std::left << std::setw(width) << setfill(seperator) << h;
 		});
 		std::cout << endl;
 
+		// print measurements
 		int rowcount{ 1 };
 		for (auto vec_iter = (ptr->second).measurementContainer_.begin(); vec_iter != (ptr->second).measurementContainer_.end(); ++vec_iter)
 		{
@@ -346,8 +354,7 @@ int datans::printExperiment(std::string &n, std::map<std::string, Experiment> u)
 			// iterating over the row
 			for (vector<std::shared_ptr<Measurement>>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
 			{
-				(*meas_it)->printInfo();
-				std::cout << "\t";
+				(*meas_it)->printInfo(width, seperator);
 			}
 			rowcount++;
 			std::cout << endl;
@@ -355,16 +362,17 @@ int datans::printExperiment(std::string &n, std::map<std::string, Experiment> u)
 
 		// finally print out % error
 		std::vector<double> errors = (ptr->second).errorCalc();
-		for_each(errors.begin(), errors.end(), [](double e)
+		std::cout << "   ";
+		for_each(errors.begin(), errors.end(), [width, seperator](double e)
 		{
-			std::cout << std::left << std::setw(5) << "% error: " << std::setw(5);
+			std::cout << std::left << std::setw(width/4) << "% error: ";
 			if (e != 0)
 			{
-				std::cout << e << "\t";
+				std::cout << std::setw(width-10) << e << std::setfill(seperator);
 			}
 			else
 			{
-				std::cout << "N/A" << std::setw(5) << "\t";
+				std::cout << std::setw(width-10) << "N/A" << std::setfill(seperator);
 			}
 		});
 		std::cout << endl;
@@ -393,6 +401,8 @@ int datans::editExperiment(std::string &n, std::map<std::string, Experiment> u)
 	std::string tempCoord;
 	std::string tempStr, buf;
 	std::vector<std::string> tempMeasurement;
+	const char seperator = ' ';
+	const int width = WIDTH;
 
 	do {
 		cout << "\nEdit which measurement? (Row, column): ";
@@ -406,7 +416,7 @@ int datans::editExperiment(std::string &n, std::map<std::string, Experiment> u)
 			coordinates.push_back(stoi(substr)-1);
 		}
 
-		ptr->second.measurementContainer_[coordinates[0]][coordinates[1]]->printInfo();
+		ptr->second.measurementContainer_[coordinates[0]][coordinates[1]]->printInfo(width, seperator);
 		cout << endl << "\nEnter new data, space delimited (date will update automatically): ";
 
 		std::getline(std::cin, tempStr);

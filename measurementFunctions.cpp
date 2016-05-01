@@ -2,10 +2,13 @@
 using namespace std;
 using namespace datans;
 
-void NumMeasure::printInfo()
+void NumMeasure::printInfo(const int &width, const char &seperator)
 {
-	std::cout << std::left << std::setw(5) << value_ << std::setw(5) << error_
-		<< std::setw(5) << systError_ << std::setw(5) << date_ << std::setw(5);
+	std::cout << std::left << std::setw((width/5)-1) << std::setfill(seperator) << value_;
+	std::cout << std::left << std::setw((width / 5) - 1) << std::setfill(seperator) << error_;
+	std::cout << std::left << std::setw((width / 5) - 1) << std::setfill(seperator) << systError_;
+	std::cout << std::left << std::setw((width / 5) + 4) << std::setfill(seperator) << date_;
+	std::cout << std::left << std::setw((width / 5) - 1) << std::setfill(seperator) << "";
 }
 
 std::string NumMeasure::saveInfo()
@@ -32,9 +35,11 @@ int NumMeasure::updateInfo(std::vector<std::string> &v)
 	}
 }
 
-void StringMeasure::printInfo()
+void StringMeasure::printInfo(const int &width, const char &seperator)
 {
-	std::cout << std::left << std::setw(5) << value_ << std::setw(5) << date_ << std::setw(5);
+	std::cout << std::left << std::setw(width / 2) << std::setfill(seperator) << value_;
+	std::cout << std::left << std::setw((width/2) - 5) << std::setfill(seperator) << date_;
+	std::cout << std::left << std::setw((width/2) - 15) << std::setfill(seperator) << "";
 }
 
 std::string StringMeasure::saveInfo()

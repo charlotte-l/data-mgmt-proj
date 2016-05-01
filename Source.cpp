@@ -5,6 +5,9 @@ using namespace datans;
 
 int main()
 {
+	// initial call to resize console window (it's gonna be big)
+	setConsoleSize(750, 450);
+
 	/******************************************************************
 	program initiation process:
 	1. create an empty map of experiments for current user
