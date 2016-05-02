@@ -97,11 +97,11 @@ namespace datans
 		std::vector<double> errorCalc();
 		friend std::shared_ptr<Measurement> addMeasurement(std::vector<std::string> v);
 		friend int readExperiment(std::string n, std::map<std::string, Experiment> &u, char readFlag);		// flag determines filepath
-		friend int addExperiment(std::map<std::string, Experiment> &u);
-		friend int printExperiment(std::string &n, std::map<std::string, Experiment> u);
-		friend int editExperiment(std::string &n, std::map<std::string, Experiment> u);
+		friend void addExperiment(std::map<std::string, Experiment> &u);
+		int printExperiment();
+		int editExperiment();
 		int saveExperiment();
-		friend int deleteExperiment(std::string &n, std::map<std::string, Experiment> &u);
+		int deleteExperiment(std::map<std::string, Experiment> &u);
 	};
 }
 

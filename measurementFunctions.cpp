@@ -28,7 +28,7 @@ std::string NumMeasure::saveInfo(char &flag)
 
 	case 'l':
 		// figure out latex formatting here
-		temp = "";
+		temp = " ";
 		return temp;
 	}
 }

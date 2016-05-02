@@ -27,13 +27,15 @@ int main()
 	{
 		int check = readExperiment((*iter), user, 'r');
 		if (check == 1)
-			cout << "Experiment " << (*iter) << " loaded." << endl;
+		{
+			cout << "Experiment " << (*iter) << " loaded successfully." << endl;
+		}
 	}
 
 	bool menu{ true };
 	char menuFlag;
 	char addFlag;
-	int check;
+	int check{ 0 };
 	std::string nameFlag;
 	std::string filePath;
 	std::map<std::string, Experiment>::iterator ptr;
@@ -52,7 +54,7 @@ int main()
 		cout << "Option: "; cin >> menuFlag; cin.ignore(); cout << endl;
 		switch (menuFlag)
 		{
-		case '1':		// printing experiment to console
+		case '1':
 			cout << "Select an experiment to view (options: ";
 			// print out the current list of experiments in memory
 			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
@@ -61,15 +63,17 @@ int main()
 			}
 			cout << "\b\b): ";
 			getline(cin, nameFlag);
-			cout << endl;
-			
-			// pseudo exception handling for invalid input
-			check = printExperiment(nameFlag, user);
-			if (check != 1)
+			ptr = user.find(nameFlag);
+			if (ptr != user.end())
 			{
-				cout << "Experiment " << nameFlag << " could not be found" << endl;
+				ptr->second.printExperiment();
+				break;
 			}
-			break;
+			else
+			{
+				cout << "Cannot find experiment" << nameFlag << endl;
+				break;
+			}
 			
 		case '2':
 			cout << "Add experiment [m]anually or from [f]ile: ";
@@ -80,12 +84,13 @@ int main()
 			case 'm':
 				addExperiment(user);
 				break;
+
 			case 'f':
 				cout << "Select a file: " << endl;
-				// check if a file with that name already exists
 				filePath = openFileDialogue();
 				nameFlag = fileNameFromPath(filePath);
-				if (std::find(fileList.begin(), fileList.end(), nameFlag) != fileList.end())
+				
+				if (std::find(fileList.begin(), fileList.end(), nameFlag + ".txt") != fileList.end())		// check if a file with that name already exists
 				{
 					cout << "Experiment with this name already exists!" << endl;
 					break;
@@ -95,11 +100,8 @@ int main()
 				if (check == 1)
 				{
 					cout << "Experiment " << nameFlag << " loaded successfully." << endl;
+					break;
 				}
-				break;
-			default:
-				cout << "Input invalid" << endl;
-				break;
 			}
 			break;
 
@@ -112,13 +114,17 @@ int main()
 			}
 			cout << "\b\b): ";
 			getline(cin, nameFlag);
-
-			check = editExperiment(nameFlag, user);
-			if (check != 1)
+			ptr = user.find(nameFlag);
+			if (ptr != user.end())
 			{
-				cout << "Experiment " << nameFlag << " could not be found" << endl;
+				ptr->second.editExperiment();
+				break;
 			}
-			break;
+			else
+			{
+				cout << "Cannot find experiment" << nameFlag << endl;
+				break;
+			}
 
 		case '4':
 			cout << "Select an experiment to export (options: ";
@@ -148,12 +154,12 @@ int main()
 				std::cout << it->first << ", ";
 			}
 			cout << "\b\b): ";
-			cin >> nameFlag;
+			getline(cin, nameFlag);
 			ptr = user.find(nameFlag);
 			// check the experiment does exist
 			if (ptr != user.end())
 			{
-				deleteExperiment(nameFlag, user);
+				ptr->second.deleteExperiment(user);
 				break;
 			}
 			else
