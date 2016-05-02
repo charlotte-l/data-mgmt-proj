@@ -1,8 +1,8 @@
-﻿Build started 02/05/2016 15:41:28.
+﻿Build started 02/05/2016 16:57:47.
      1>Project "d:\libraries\documents\visual studio 2013\Projects\FinalProj\FinalProj\FinalProj.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         D:\Program Files\Visual Studio 2013\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Source.cpp
-         Source.cpp
+         D:\Program Files\Visual Studio 2013\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt experimentFunctions.cpp
+         experimentFunctions.cpp
        Link:
          D:\Program Files\Visual Studio 2013\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.lib" /MACHINE:X86 Debug\experimentFunctions.obj
          Debug\miscFunctions.obj
@@ -13,4 +13,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.99
+Time Elapsed 00:00:01.22

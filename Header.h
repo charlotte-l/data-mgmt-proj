@@ -1,7 +1,6 @@
 #ifndef MY_HEADER
 #define MY_HEADER
 #define NOMINMAX
-#define WIDTH 40;
 
 #include<iostream>
 #include<iomanip>
@@ -19,6 +18,7 @@
 #include<locale>
 #include<codecvt>
 
+const int WIDTH = 40;
 std::vector<std::string> readDir();
 bool isFileExist(std::string &n);
 
@@ -37,7 +37,7 @@ namespace datans
 	{
 	public:
 		virtual ~Measurement(){};
-		virtual void printInfo(const int &width, const char &seperator) = 0;
+		virtual void printInfo(const char &seperator) = 0;
 		virtual std::string saveInfo(char &flag) = 0;
 		virtual double getError() = 0;
 		virtual double getValue() = 0;
@@ -52,10 +52,10 @@ namespace datans
 		double systError_;
 		std::string date_;
 	public:
-		NumMeasure() : value_(0), error_(0), systError_(0) { date_ = currentDate(); }
+		//NumMeasure() : value_(0), error_(0), systError_(0) { date_ = currentDate(); }
 		NumMeasure(double value, double error, double systError, std::string date) : value_(value), error_(error), systError_(systError), date_(date) {}
 		~NumMeasure() {}
-		void printInfo(const int &width, const char &seperator);
+		void printInfo(const char &seperator);
 		std::string saveInfo(char &flag);
 		double getError() { return error_ + systError_; }
 		double getValue() { return value_; }
@@ -69,10 +69,10 @@ namespace datans
 		std::string date_;
 		char dateflag_;
 	public:
-		StringMeasure() : value_("null") { date_ = currentDate(); }
+		//StringMeasure() : value_("null") { date_ = currentDate(); }
 		StringMeasure(std::string value, std::string date) : value_(value), date_(date){};
 		~StringMeasure(){}
-		void printInfo(const int &width, const char &seperator);
+		void printInfo(const char &seperator);
 		std::string saveInfo(char &flag);
 		double getError() { return 0; }
 		double getValue() { return 0; } // this function is only called in error calculation and so returns 0
@@ -90,19 +90,19 @@ namespace datans
 		Experiment() : name_("null") { headings_.push_back("null"); }
 		Experiment(std::string name, std::vector<std::string> v);
 		~Experiment() {}
-
-		// move constructor
 		Experiment(Experiment&& e);
 
 		std::vector<double> errorCalc();
 		friend std::shared_ptr<Measurement> addMeasurement(std::vector<std::string> v);
-		friend int readExperiment(std::string n, std::map<std::string, Experiment> &u, char readFlag);		// flag determines filepath
+		friend void readExperiment(std::string n, std::map<std::string, Experiment> &u, char readFlag);		// flag determines filepath
 		friend void addExperiment(std::map<std::string, Experiment> &u);
 		int printExperiment();
 		int editExperiment();
 		int saveExperiment();
 		int deleteExperiment(std::map<std::string, Experiment> &u);
 	};
+
+	void printExperimentList(std::map<std::string, Experiment> user);
 }
 
 namespace

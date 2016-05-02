@@ -2,13 +2,13 @@
 using namespace std;
 using namespace datans;
 
-void NumMeasure::printInfo(const int &width, const char &seperator)
+void NumMeasure::printInfo(const char &seperator)
 {
-	std::cout << std::left << std::setw((width/5)-1) << std::setfill(seperator) << value_;
-	std::cout << std::left << std::setw((width / 5) - 1) << std::setfill(seperator) << error_;
-	std::cout << std::left << std::setw((width / 5) - 1) << std::setfill(seperator) << systError_;
-	std::cout << std::left << std::setw((width / 5) + 4) << std::setfill(seperator) << date_;
-	std::cout << std::left << std::setw((width / 5) - 1) << std::setfill(seperator) << "";
+	std::cout << std::left << std::setw((WIDTH / 5) - 1) << std::setfill(seperator) << std::setprecision(5) << value_;
+	std::cout << std::left << std::setw((WIDTH / 5) - 1) << std::setfill(seperator) << std::setprecision(5) << error_;
+	std::cout << std::left << std::setw((WIDTH / 5) - 1) << std::setfill(seperator) << std::setprecision(5) << systError_;
+	std::cout << std::left << std::setw((WIDTH / 5) + 4) << std::setfill(seperator) << date_;
+	std::cout << std::left << std::setw((WIDTH / 5) - 1) << std::setfill(seperator) << "";
 }
 
 std::string NumMeasure::saveInfo(char &flag)
@@ -16,20 +16,32 @@ std::string NumMeasure::saveInfo(char &flag)
 	std::string temp;
 	switch (flag)
 	{
-	case 't':
-		temp = std::to_string(value_) + " " + std::to_string(error_)
-			+ " " + std::to_string(systError_) + " " + date_ + "\t";
-		return temp;
+		case 't':
+		{
+			temp = std::to_string(value_) + " " + std::to_string(error_)
+				+ " " + std::to_string(systError_) + " " + date_ + "\t";
+			return temp;
+		}
 
-	case 'c':
-		temp = std::to_string(value_) + "," + std::to_string(error_)
-			+ "," + std::to_string(systError_) + "," + date_ + "," + " ";
-		return temp;
+		case 'c':
+		{
+			temp = std::to_string(value_) + "," + std::to_string(error_)
+				+ "," + std::to_string(systError_) + "," + date_ + "," + " ";
+			return temp;
+		}
 
-	case 'l':
-		// figure out latex formatting here
-		temp = " ";
-		return temp;
+		case 'l':
+		{
+			// figure out latex formatting here
+			temp = "tempstr";
+			return temp;
+		}
+
+		default:
+		{
+			perror("Invalid input");
+			return " ";
+		}
 	}
 }
 
@@ -50,11 +62,11 @@ int NumMeasure::updateInfo(std::vector<std::string> &v)
 	}
 }
 
-void StringMeasure::printInfo(const int &width, const char &seperator)
+void StringMeasure::printInfo(const char &seperator)
 {
-	std::cout << std::left << std::setw(width / 2) << std::setfill(seperator) << value_;
-	std::cout << std::left << std::setw((width/2) - 5) << std::setfill(seperator) << date_;
-	std::cout << std::left << std::setw((width/2) - 15) << std::setfill(seperator) << "";
+	std::cout << std::left << std::setw(WIDTH / 2) << std::setfill(seperator) << value_;
+	std::cout << std::left << std::setw((WIDTH / 2) - 5) << std::setfill(seperator) << date_;
+	std::cout << std::left << std::setw((WIDTH / 2) - 15) << std::setfill(seperator) << "";
 }
 
 std::string StringMeasure::saveInfo(char &flag)

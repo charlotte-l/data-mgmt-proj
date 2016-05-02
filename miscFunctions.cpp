@@ -36,3 +36,12 @@ bool isFileExist(std::string &n)
 	std::ifstream infile(".//data//" + n + ".txt");
 	return infile.good();
 }
+
+void datans::printExperimentList(std::map<std::string, Experiment> user)
+{
+	for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
+	{
+		std::cout << it->first << ", ";
+	}
+	cout << "\b\b): ";
+}

@@ -16,11 +16,13 @@ Experiment::Experiment(Experiment&& e)
 	headings_ = e.headings_;
 	measurementContainer_ = std::move(e.measurementContainer_);
 	dataHeadings_ = e.dataHeadings_;
-	name_.assign(e.name_, 0, name_.length());
+	name_ = e.name_;
+	//name_.assign(e.name_, 0, name_.length());
 
 	e.headings_.clear();
 	e.dataHeadings_.clear();
 	e.measurementContainer_.clear();
+	e.name_.clear();
 }
 
 vector<double> Experiment::errorCalc()
@@ -41,7 +43,7 @@ vector<double> Experiment::errorCalc()
 			index = std::distance((*vec_iter).begin(), meas_it);
 			if ((*meas_it)->getValue() != 0)
 			{
-				errors[index] += ((*meas_it)->getError() / (*meas_it)->getValue());
+				errors[index] += ((*meas_it)->getError() / fabs((*meas_it)->getValue()));
 			}
 		}
 	}
@@ -80,11 +82,12 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 			throw "Invalid data type! Format should be (numerical value, error, systematic error, date) or (textual value, date)\n";
 			break;
 		}
+		break;
 	}
 	return ptr;
 }
 
-int datans::readExperiment(std::string n, std::map<std::string, Experiment> &u, char readFlag)
+void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u, char readFlag)
 {
 	std::ifstream dataFile;
 	std::string tempLine, tempLine2, buf;
@@ -132,6 +135,7 @@ int datans::readExperiment(std::string n, std::map<std::string, Experiment> &u, 
 				{
 					tempMeasurement.push_back(buf);
 				}
+				
 				if (counter == 0)
 				{
 					if (tempMeasurement.size() == 4)
@@ -143,13 +147,14 @@ int datans::readExperiment(std::string n, std::map<std::string, Experiment> &u, 
 						tempDataHeadings[colCount] = "Val                 Date        ";
 					}
 				}
+
 				else
-				// now we compare other measurements to the first to ensure same type down columns
+				// compare other measurements to the first to ensure same type down columns
 				{
 					if ((tempDataHeadings[colCount].length() < 13 && tempMeasurement.size() == 4) || (tempDataHeadings[colCount].length() > 13 && tempMeasurement.size() == 2))
 					{
 						perror("Measurements in a column should be of the same type");
-						return -1;
+						return;
 					}
 				}
 				colCount++;
@@ -165,19 +170,21 @@ int datans::readExperiment(std::string n, std::map<std::string, Experiment> &u, 
 		{
 			int check = tempExp.saveExperiment();
 			if (check != 1)
-				std::cout << "Could not save experiment to file.\n";
+			{
+				return;
+			}
 		}
 
 		u.insert(std::make_pair(n, std::move(tempExp)));
-		u[n].name_ = n;
 		u[n].dataHeadings_ = tempDataHeadings;
 		dataFile.close();
-		return 1;
+		cout << "Experiment " << n << "loaded successfully";
+		return;
 	}
 	else
 	{
-		std::cout << "Could not find or read file " << n << endl;
-		return -1;
+		perror("Could not find or read file\n");
+		return;
 	}
 }
 
@@ -280,7 +287,6 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 	}
 
 	u.insert(std::make_pair(tempName, std::move(tempExp)));
-	u[tempName].name_ = tempName;
 	u[tempName].dataHeadings_ = tempDataHeadings;
 }
 
@@ -288,6 +294,7 @@ int Experiment::printExperiment()
 {
 	const char seperator = ' ';
 	const int width = WIDTH;
+	
 	std::cout << endl;
 	std::cout << "   ";
 	// print out header numbers
@@ -321,13 +328,13 @@ int Experiment::printExperiment()
 		// iterating over the row
 		for (vector<std::shared_ptr<Measurement>>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
 		{
-			(*meas_it)->printInfo(width, seperator);
+			(*meas_it)->printInfo(seperator);
 		}
 		rowcount++;
 		std::cout << endl;
 	}
 
-	// finally print out % error
+	// print out % error
 	std::vector<double> errors = errorCalc();
 	std::cout << "   ";
 	for_each(errors.begin(), errors.end(), [width, seperator](double e)
@@ -349,7 +356,7 @@ int Experiment::printExperiment()
 int Experiment::editExperiment()
 {
 	cout << endl;
-	this->printExperiment();
+	printExperiment();
 
 	vector<int> coordinates;	// [0] = row   [1] = col
 	std::string tempCoord;
@@ -372,7 +379,7 @@ int Experiment::editExperiment()
 				std::string substr;
 				getline(ss, substr, ',');
 
-				if (stoi(substr) - 1 < headings_.size())
+				if (stoi(substr) - 1 < static_cast<int>(headings_.size()))
 				{
 					coordinates.push_back(stoi(substr) - 1);
 				}
@@ -389,7 +396,7 @@ int Experiment::editExperiment()
 			return -1;
 		}
 
-		measurementContainer_[coordinates[0]][coordinates[1]]->printInfo(width, seperator);
+		measurementContainer_[coordinates[0]][coordinates[1]]->printInfo(seperator);
 		cout << endl << "\nEnter new data, space delimited (date will update automatically): ";
 
 		std::getline(std::cin, tempStr);
@@ -414,8 +421,16 @@ int Experiment::editExperiment()
 		std::cin.ignore();
 
 	} while (tolower(flag) == 'y');
-
-	return 1;
+	check = saveExperiment();
+	if (check == 1)
+	{
+		return 1;
+	}
+	else
+	{
+		cout << "No changes made to experiment " << name_ << ".\n";
+		return -1;
+	}
 }
 
 int Experiment::saveExperiment()
@@ -429,7 +444,7 @@ int Experiment::saveExperiment()
 
 		if (flag == 'N' || flag == 'n')
 		{
-			std::cout << "Save operation aborted.\n";
+			std::cout << "\nSave operation aborted.\n";
 			return -1;
 		}
 	}
@@ -461,7 +476,7 @@ int Experiment::saveExperiment()
 	}
 	else
 	{
-		std::cout << "Could not find experiment\n";
+		perror("Could not open file\n");
 		return -1;
 	}
 }

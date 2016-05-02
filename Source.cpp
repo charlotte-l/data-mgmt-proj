@@ -25,45 +25,36 @@ int main()
 	// load all existing experiments into memory
 	for (auto iter = fileList.begin(); iter != fileList.end(); ++iter)
 	{
-		int check = readExperiment((*iter), user, 'r');
-		if (check == 1)
-		{
-			cout << "Experiment " << (*iter) << " loaded successfully." << endl;
-		}
+		readExperiment((*iter), user, 'r');
 	}
-
+	
 	bool menu{ true };
-	char menuFlag;
-	char addFlag;
-	int check{ 0 };
-	std::string nameFlag;
+	char menuOption;
+	char addType;
+	std::string fileName;
 	std::string filePath;
 	std::map<std::string, Experiment>::iterator ptr;
 	
-	// user menu
 	cout << "Welcome to DataManager. Select an option:" << endl;
 	do
 	{
-		cout << endl << "[1]. Display experiment" << endl;
+		cout << endl;
+		cout << "[1]. Display experiment" << endl;
 		cout << "[2]. Add experiment" << endl;
 		cout << "[3]. Edit experiment" << endl;
 		cout << "[4]. Export experiment" << endl;
 		cout << "[5]. Delete experiment " << endl;
 		cout << "[6]. Exit" << endl;
 
-		cout << "Option: "; cin >> menuFlag; cin.ignore(); cout << endl;
-		switch (menuFlag)
+		cout << "Option: "; cin >> menuOption; cin.ignore(); cout << endl;
+		switch (menuOption)
 		{
 		case '1':
 			cout << "Select an experiment to view (options: ";
 			// print out the current list of experiments in memory
-			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
-			{
-				std::cout << it->first << ", ";
-			}
-			cout << "\b\b): ";
-			getline(cin, nameFlag);
-			ptr = user.find(nameFlag);
+			printExperimentList(user);
+			getline(cin, fileName);
+			ptr = user.find(fileName);
 			if (ptr != user.end())
 			{
 				ptr->second.printExperiment();
@@ -71,15 +62,16 @@ int main()
 			}
 			else
 			{
-				cout << "Cannot find experiment" << nameFlag << endl;
+				cout << "Cannot find experiment" << fileName << endl;
 				break;
 			}
+			break;
 			
 		case '2':
 			cout << "Add experiment [m]anually or from [f]ile: ";
-			cin >> addFlag;
+			cin >> addType;
 			cin.ignore();
-			switch (tolower(addFlag))
+			switch (tolower(addType))
 			{
 			case 'm':
 				addExperiment(user);
@@ -88,33 +80,23 @@ int main()
 			case 'f':
 				cout << "Select a file: " << endl;
 				filePath = openFileDialogue();
-				nameFlag = fileNameFromPath(filePath);
+				fileName = fileNameFromPath(filePath);
 				
-				if (std::find(fileList.begin(), fileList.end(), nameFlag + ".txt") != fileList.end())		// check if a file with that name already exists
+				if (std::find(fileList.begin(), fileList.end(), fileName + ".txt") != fileList.end())		// check if a file with that name already exists
 				{
 					cout << "Experiment with this name already exists!" << endl;
 					break;
 				}
-
-				check = readExperiment(filePath, user, 'f');
-				if (check == 1)
-				{
-					cout << "Experiment " << nameFlag << " loaded successfully." << endl;
-					break;
-				}
+				readExperiment(filePath, user, 'f');
+				break;
 			}
 			break;
 
 		case '3':
 			cout << "Select an experiment to edit (options: ";
-			// print out the current list of experiments in memory
-			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
-			{
-				std::cout << it->first << ", ";
-			}
-			cout << "\b\b): ";
-			getline(cin, nameFlag);
-			ptr = user.find(nameFlag);
+			printExperimentList(user);
+			getline(cin, fileName);
+			ptr = user.find(fileName);
 			if (ptr != user.end())
 			{
 				ptr->second.editExperiment();
@@ -122,20 +104,16 @@ int main()
 			}
 			else
 			{
-				cout << "Cannot find experiment" << nameFlag << endl;
+				cout << "Cannot find experiment" << fileName << endl;
 				break;
 			}
+			break;
 
 		case '4':
 			cout << "Select an experiment to export (options: ";
-			// print out the current list of experiments in memory
-			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
-			{
-				std::cout << it->first << ", ";
-			}
-			cout << "\b\b): ";
-			getline(cin, nameFlag);
-			ptr = user.find(nameFlag);
+			printExperimentList(user);
+			getline(cin, fileName);
+			ptr = user.find(fileName);
 			if (ptr != user.end())
 			{
 				ptr->second.saveExperiment();
@@ -143,19 +121,16 @@ int main()
 			}
 			else
 			{
-				cout << "Cannot find experiment" << nameFlag << endl;
+				cout << "Cannot find experiment" << fileName << endl;
 				break;
 			}
+			break;
 
 		case '5':
 			cout << "Enter name of experiment to delete (options: ";
-			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
-			{
-				std::cout << it->first << ", ";
-			}
-			cout << "\b\b): ";
-			getline(cin, nameFlag);
-			ptr = user.find(nameFlag);
+			printExperimentList(user);
+			getline(cin, fileName);
+			ptr = user.find(fileName);
 			// check the experiment does exist
 			if (ptr != user.end())
 			{
@@ -164,9 +139,10 @@ int main()
 			}
 			else
 			{
-				cout << "Cannot find experiment" << nameFlag << endl;
+				cout << "Cannot find experiment" << fileName << endl;
 				break;
 			}
+			break;
 
 		case '6':
 			menu = false;
