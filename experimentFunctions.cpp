@@ -153,7 +153,7 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 				{
 					if ((tempDataHeadings[colCount].length() < 13 && tempMeasurement.size() == 4) || (tempDataHeadings[colCount].length() > 13 && tempMeasurement.size() == 2))
 					{
-						perror("Measurements in a column should be of the same type");
+						perror("\nMeasurements in a column should be of the same type\n");
 						return;
 					}
 				}
@@ -178,7 +178,7 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 		u.insert(std::make_pair(n, std::move(tempExp)));
 		u[n].dataHeadings_ = tempDataHeadings;
 		dataFile.close();
-		cout << "Experiment " << n << "loaded successfully";
+		cout << "Experiment " << n << " loaded successfully\n";
 		return;
 	}
 	else

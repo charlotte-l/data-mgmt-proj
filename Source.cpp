@@ -34,7 +34,7 @@ int main()
 	std::string fileName;
 	std::string filePath;
 	std::map<std::string, Experiment>::iterator ptr;
-	
+
 	cout << "Welcome to DataManager. Select an option:" << endl;
 	do
 	{

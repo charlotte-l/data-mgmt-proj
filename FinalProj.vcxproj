@@ -84,7 +84,6 @@
     <ClCompile Include="measurementFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dirent.h" />
     <ClInclude Include="Header.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
