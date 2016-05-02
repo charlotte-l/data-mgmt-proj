@@ -11,11 +11,26 @@ void NumMeasure::printInfo(const int &width, const char &seperator)
 	std::cout << std::left << std::setw((width / 5) - 1) << std::setfill(seperator) << "";
 }
 
-std::string NumMeasure::saveInfo()
+std::string NumMeasure::saveInfo(char &flag)
 {
-	std::string temp = std::to_string(value_) + " " + std::to_string(error_)
-		+ " " + std::to_string(systError_) + " " + date_ + "\t";
-	return temp;
+	std::string temp;
+	switch (flag)
+	{
+	case 't':
+		temp = std::to_string(value_) + " " + std::to_string(error_)
+			+ " " + std::to_string(systError_) + " " + date_ + "\t";
+		return temp;
+
+	case 'c':
+		temp = std::to_string(value_) + "," + std::to_string(error_)
+			+ "," + std::to_string(systError_) + "," + date_ + "," + " ";
+		return temp;
+
+	case 'l':
+		// figure out latex formatting here
+		temp = "";
+		return temp;
+	}
 }
 
 int NumMeasure::updateInfo(std::vector<std::string> &v)
@@ -42,7 +57,7 @@ void StringMeasure::printInfo(const int &width, const char &seperator)
 	std::cout << std::left << std::setw((width/2) - 15) << std::setfill(seperator) << "";
 }
 
-std::string StringMeasure::saveInfo()
+std::string StringMeasure::saveInfo(char &flag)
 {
 	std::string temp = value_ + " " + date_ + "\t";
 	return temp;

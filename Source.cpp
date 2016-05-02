@@ -35,8 +35,8 @@ int main()
 	char addFlag;
 	int check;
 	std::string nameFlag;
+	std::string filePath;
 	std::map<std::string, Experiment>::iterator ptr;
-	
 	
 	// user menu
 	cout << "Welcome to DataManager. Select an option:" << endl;
@@ -45,8 +45,9 @@ int main()
 		cout << endl << "[1]. Display experiment" << endl;
 		cout << "[2]. Add experiment" << endl;
 		cout << "[3]. Edit experiment" << endl;
-		cout << "[4]. Delete experiment " << endl;
-		cout << "[5]. Exit" << endl;
+		cout << "[4]. Export experiment" << endl;
+		cout << "[5]. Delete experiment " << endl;
+		cout << "[6]. Exit" << endl;
 
 		cout << "Option: "; cin >> menuFlag; cin.ignore(); cout << endl;
 		switch (menuFlag)
@@ -80,18 +81,20 @@ int main()
 				addExperiment(user);
 				break;
 			case 'f':
-				cout << "Enter filename (i.e. data.txt): ";
-				cin >> nameFlag;
+				cout << "Select a file: " << endl;
 				// check if a file with that name already exists
+				filePath = openFileDialogue();
+				nameFlag = fileNameFromPath(filePath);
 				if (std::find(fileList.begin(), fileList.end(), nameFlag) != fileList.end())
 				{
 					cout << "Experiment with this name already exists!" << endl;
+					break;
 				}
-				else
+
+				check = readExperiment(filePath, user, 'f');
+				if (check == 1)
 				{
-					check = readExperiment(nameFlag, user, 'f');
-					if (check == 1)
-						cout << "Experiment " << nameFlag << " loaded successfully." << endl;
+					cout << "Experiment " << nameFlag << " loaded successfully." << endl;
 				}
 				break;
 			default:
@@ -118,6 +121,27 @@ int main()
 			break;
 
 		case '4':
+			cout << "Select an experiment to export (options: ";
+			// print out the current list of experiments in memory
+			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
+			{
+				std::cout << it->first << ", ";
+			}
+			cout << "\b\b): ";
+			getline(cin, nameFlag);
+			ptr = user.find(nameFlag);
+			if (ptr != user.end())
+			{
+				ptr->second.saveExperiment();
+				break;
+			}
+			else
+			{
+				cout << "Cannot find experiment" << nameFlag << endl;
+				break;
+			}
+
+		case '5':
 			cout << "Enter name of experiment to delete (options: ";
 			for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
 			{
@@ -138,7 +162,7 @@ int main()
 				break;
 			}
 
-		case '5':
+		case '6':
 			menu = false;
 			break;
 
