@@ -18,7 +18,7 @@
 #include<locale>
 #include<codecvt>
 
-const int WIDTH = 40;
+const int WIDTH = 40;	// column with in experiment output
 std::vector<std::string> readDir();
 bool isFileExist(std::string &n);
 
@@ -33,6 +33,8 @@ namespace
 
 namespace datans
 {
+	// class interface for storing individual measurements, either of
+	// numerical or text base values
 	class Measurement
 	{
 	public:
@@ -52,11 +54,11 @@ namespace datans
 		double systError_;
 		std::string date_;
 	public:
-		//NumMeasure() : value_(0), error_(0), systError_(0) { date_ = currentDate(); }
 		NumMeasure(double value, double error, double systError, std::string date) : value_(value), error_(error), systError_(systError), date_(date) {}
 		~NumMeasure() {}
+		// getters and setters
 		void printInfo(const char &seperator);
-		std::string saveInfo(char &flag);
+		std::string saveInfo(char &flag);	// flag determines saving as .txt, .csv or .tex
 		double getError() { return error_ + systError_; }
 		double getValue() { return value_; }
 		int updateInfo(std::vector<std::string> &v);
@@ -69,21 +71,22 @@ namespace datans
 		std::string date_;
 		char dateflag_;
 	public:
-		//StringMeasure() : value_("null") { date_ = currentDate(); }
 		StringMeasure(std::string value, std::string date) : value_(value), date_(date){};
 		~StringMeasure(){}
+		// getters and setters
 		void printInfo(const char &seperator);
-		std::string saveInfo(char &flag);
+		std::string saveInfo(char &flag);	// flag determines saving as .txt, .csv or .tex
 		double getError() { return 0; }
 		double getValue() { return 0; } // this function is only called in error calculation and so returns 0
 		int updateInfo(std::vector<std::string> &v);
 	};
 
+	// class to store measurements in a container and manipulate
 	class Experiment
 	{
 	private:
 		std::vector<std::string> headings_;
-		std::vector<std::string> dataHeadings_;
+		std::vector<std::string> dataHeadings_;		// if data is num or string, it will have a header of that type
 		std::vector < std::vector<std::shared_ptr<Measurement>> > measurementContainer_;
 		std::string name_;
 	public:
@@ -107,6 +110,7 @@ namespace datans
 
 namespace
 {
+	// returns current date
 	const std::string currentDate()
 	{
 		time_t t = time(0);
@@ -117,6 +121,7 @@ namespace
 		return buf;
 	}
 
+	// creates a win32api dialogue to return filepath for opening files
 	std::string openFileDialogue()
 	{
 		OPENFILENAME ofn;
@@ -149,7 +154,7 @@ namespace
 		return filePath;
 	}
 
-	// parse filepath from openFileDialogue
+	// parse filepath from openFileDialogue into a name only
 	std::string fileNameFromPath(std::string &filePath)
 	{
 		const int position = filePath.find_last_of("\\/");

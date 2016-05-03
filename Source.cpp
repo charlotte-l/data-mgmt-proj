@@ -17,10 +17,14 @@ int main()
 	   new experiment
 	******************************************************************/
 	
+	// initialise map and filelist
 	std::map<std::string, Experiment> user;
 	std::vector<std::string> fileList = readDir();
 
-	cout << "Loading previous experiments..." << endl;
+	if (fileList.empty() != 1)
+	{
+		cout << "Loading previous experiments..." << endl;
+	}
 
 	// load all existing experiments into memory
 	for (auto iter = fileList.begin(); iter != fileList.end(); ++iter)
@@ -35,6 +39,7 @@ int main()
 	std::string filePath;
 	std::map<std::string, Experiment>::iterator ptr;
 
+	// user menu
 	cout << "Welcome to DataManager. Select an option:" << endl;
 	do
 	{
@@ -51,9 +56,9 @@ int main()
 		{
 		case '1':
 			cout << "Select an experiment to view (options: ";
-			// print out the current list of experiments in memory
 			printExperimentList(user);
 			getline(cin, fileName);
+			// find the object - if found, print it's info
 			ptr = user.find(fileName);
 			if (ptr != user.end())
 			{
@@ -62,15 +67,14 @@ int main()
 			}
 			else
 			{
-				cout << "Cannot find experiment" << fileName << endl;
+				cout << "Cannot find experiment " << fileName << endl;
 				break;
 			}
 			break;
 			
 		case '2':
 			cout << "Add experiment [m]anually or from [f]ile: ";
-			cin >> addType;
-			cin.ignore();
+			cin >> addType; cin.ignore();
 			switch (tolower(addType))
 			{
 			case 'm':
@@ -79,6 +83,7 @@ int main()
 
 			case 'f':
 				cout << "Select a file: " << endl;
+				// call openfiledialogue, parse it's path then open the file
 				filePath = openFileDialogue();
 				fileName = fileNameFromPath(filePath);
 				
@@ -87,7 +92,13 @@ int main()
 					cout << "Experiment with this name already exists!" << endl;
 					break;
 				}
+				// flag f to read from file
 				readExperiment(filePath, user, 'f');
+				break;
+			default:
+				cout << "Command not recognised.\n";
+				cin.clear();
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 				break;
 			}
 			break;
@@ -96,6 +107,7 @@ int main()
 			cout << "Select an experiment to edit (options: ";
 			printExperimentList(user);
 			getline(cin, fileName);
+			// check if object exists, if so move to editExperiment routine
 			ptr = user.find(fileName);
 			if (ptr != user.end())
 			{
@@ -113,6 +125,7 @@ int main()
 			cout << "Select an experiment to export (options: ";
 			printExperimentList(user);
 			getline(cin, fileName);
+			// check if object exists, if so move to saveExperiment routine
 			ptr = user.find(fileName);
 			if (ptr != user.end())
 			{
@@ -131,7 +144,7 @@ int main()
 			printExperimentList(user);
 			getline(cin, fileName);
 			ptr = user.find(fileName);
-			// check the experiment does exist
+			// check if object exists, if so move to deleteExperiment routine
 			if (ptr != user.end())
 			{
 				ptr->second.deleteExperiment(user);
@@ -145,6 +158,7 @@ int main()
 			break;
 
 		case '6':
+			// set flag to false to exit do-while loop
 			menu = false;
 			break;
 

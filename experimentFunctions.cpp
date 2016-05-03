@@ -2,6 +2,7 @@
 using namespace std;
 using namespace datans;
 
+// default constructor for Experiment objects
 Experiment::Experiment(std::string name, std::vector<std::string> v) : name_(name)
 {
 	for (auto iter = v.begin(); iter != v.end(); ++iter)
@@ -10,21 +11,23 @@ Experiment::Experiment(std::string name, std::vector<std::string> v) : name_(nam
 	}
 }
 
-// rvalue move constructor for efficient moving of experiment objects
+// rvalue move constructor for efficient moving of Experiment objects
 Experiment::Experiment(Experiment&& e)
 {
+	// copy all types
 	headings_ = e.headings_;
 	measurementContainer_ = std::move(e.measurementContainer_);
 	dataHeadings_ = e.dataHeadings_;
 	name_ = e.name_;
-	//name_.assign(e.name_, 0, name_.length());
 
+	// now cleanup the original
 	e.headings_.clear();
 	e.dataHeadings_.clear();
 	e.measurementContainer_.clear();
 	e.name_.clear();
 }
 
+// error calculation for experiment objects
 vector<double> Experiment::errorCalc()
 {
 	double rowCount{ 0 };
@@ -32,6 +35,7 @@ vector<double> Experiment::errorCalc()
 
 	vector<double> errors(headings_.size());
 
+	// iterate over rows in experiment
 	for (auto vec_iter = measurementContainer_.begin(); vec_iter != measurementContainer_.end(); ++vec_iter)
 	{
 		rowCount++;
@@ -48,6 +52,7 @@ vector<double> Experiment::errorCalc()
 		}
 	}
 
+	// divide by rowcount to get average error
 	for_each(errors.begin(), errors.end(), [rowCount](double val)
 	{
 		val = val / rowCount;
@@ -55,13 +60,15 @@ vector<double> Experiment::errorCalc()
 	return errors;
 }
 
+// add measurement based on a temporary measurement
 std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 {
 	int vectorSize = v.size();
-	std::shared_ptr<Measurement> ptr;
+	std::shared_ptr<Measurement> ptr;	// base class pointer
 
 	switch (vectorSize)
 	{
+	// size 4 = double type
 	case 4:
 		{
 			// convert to relevant type
@@ -72,6 +79,7 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 			ptr.reset(new NumMeasure(tempVal, tempErr, tempSyst, v[3]));
 			break;
 		}
+	// size 2 = string type
 	case 2:
 		{
 			ptr.reset(new StringMeasure(v[0], v[1]));
@@ -87,6 +95,7 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 	return ptr;
 }
 
+// read experiment in either from file or from default data folder
 void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u, char readFlag)
 {
 	std::ifstream dataFile;
@@ -94,16 +103,18 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 	std::vector<std::string> tempHeadings, tempDataHeadings, tempMeasurement;
 	std::vector<shared_ptr<Measurement>> rowMeasurement;
 
+	// reading from data folder
 	if (readFlag == 'r')
 	{
 		dataFile.open(".//data//" + n);
 		n.erase(n.end()-4, n.end());
 	}
 
+	// filepath parsed from openFileDialogue
 	else if (readFlag == 'f')
 	{
 		dataFile.open(n);
-		// reassign n
+		// reassign n to be just the name
 		n = fileNameFromPath(n);
 	}
 
@@ -117,6 +128,7 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 			tempHeadings.push_back(buf);
 		}
 
+		// create temporary object
 		Experiment tempExp(n, tempHeadings);
 		tempDataHeadings.resize(tempHeadings.size());
 		static int counter{ 0 };
@@ -128,14 +140,14 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 			// we read the whole line, then each measurement is tab delineated, so split into n strings (each string is a measurement)
 			// then create each measurement and push that back into a row. row is then pushed back into the measurement container
 			std::stringstream ss(tempLine);
-			while (getline(ss, tempLine2, '\t'))
+			while (std::getline(ss, tempLine2, '\t'))
 			{
 				std::stringstream ss2(tempLine2);
 				while (ss2 >> buf)
 				{
 					tempMeasurement.push_back(buf);
-				}
-				
+				}			
+				// only execute once to set dataheadings
 				if (counter == 0)
 				{
 					if (tempMeasurement.size() == 4)
@@ -147,7 +159,6 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 						tempDataHeadings[colCount] = "Val                 Date        ";
 					}
 				}
-
 				else
 				// compare other measurements to the first to ensure same type down columns
 				{
@@ -158,16 +169,26 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 					}
 				}
 				colCount++;
-				rowMeasurement.push_back(std::move(addMeasurement(tempMeasurement)));
+				// try catch to find invalid input; no recovery (user must fix their file)
+				try {
+					rowMeasurement.push_back(std::move(addMeasurement(tempMeasurement)));
+				}
+				catch (const char* msg) {
+					cerr << msg;
+					cerr << "Check format of file " << n << " and try again." << endl;
+					std::cin.clear();
+					return;
+				}
 				tempMeasurement.clear();
 			}
 			tempExp.measurementContainer_.emplace_back(std::move(rowMeasurement));
 		}
 		tempHeadings.clear();
 
-		// if flag is f, save the experiment locally
+		// if file is from openFileDialogue, save the experiment locally to data folder
 		if (readFlag == 'f')
 		{
+			// for checking file exists and can be wrote to
 			int check = tempExp.saveExperiment();
 			if (check != 1)
 			{
@@ -175,10 +196,11 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 			}
 		}
 
-		u.insert(std::make_pair(n, std::move(tempExp)));
+		// move object to the map
+		u[n] = std::move(tempExp);
 		u[n].dataHeadings_ = tempDataHeadings;
 		dataFile.close();
-		cout << "Experiment " << n << " loaded successfully\n";
+		std::cout << "Experiment " << n << " loaded successfully\n";
 		return;
 	}
 	else
@@ -188,6 +210,7 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 	}
 }
 
+// add experiment by hand
 void datans::addExperiment(std::map<std::string, Experiment> &u)
 {
 	std::string tempName, tempStr, buf;
@@ -197,12 +220,14 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 	std::cout << "Enter experiment name: ";
 	std::getline(std::cin, tempName);
 
+	// check if the experiment exists, if so can overwrite, if not exit
 	std::map<std::string, Experiment>::iterator ptr;
 	ptr = u.find(tempName);
 	if (ptr != u.end())
 	{
 		cout << "Experiment with this name already exists! Overwrite? (Y/N): ";
 		cin >> existsFlag;
+		cin.ignore();
 		if (tolower(existsFlag) == 'n')
 		{
 			cout << "Aborting adding of experiment.\n";
@@ -218,10 +243,12 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 		tempHeadings.push_back(buf);
 	}
 
+	// create temporary object
 	Experiment tempExp(tempName, tempHeadings);
 	tempDataHeadings.resize(tempHeadings.size());
 
 	char loopFlag('y');	// for do-while loop
+	char isGood('y');	// for retrying of try-catch loop
 	std::vector<string> tempMeasurement;
 	std::vector<std::shared_ptr<Measurement>> rowMeasurement;
 	static int counter{ 0 };
@@ -230,48 +257,61 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 	{
 		for (unsigned int i = 0; i < tempHeadings.size(); ++i)
 		{
-			try {
-				std::cout << "Enter data " << counter + 1 << " for " << tempHeadings[i] << " (space delimited):\n";
-				std::getline(std::cin, tempStr);
-				std::stringstream ss(tempStr);
-				while (ss >> buf)
-				{
-					tempMeasurement.push_back(buf);
-				}
-				// only need to execute this code once
-				if (counter == 0)
-				{
-					if (tempMeasurement.size() == 4)
+			do {
+				try {
+					std::cout << "Enter data " << counter + 1 << " for " << tempHeadings[i] << " (space delimited).";
+					std::cout << " Example formats: \"10 2 2 2016-05-03\"  or  \"Red 2016-05-03\" :\n";
+					std::getline(std::cin, tempStr);
+					std::stringstream ss(tempStr);
+					while (ss >> buf)
 					{
-						tempDataHeadings[i] = "Value   Err   Systerr   Date";
+						tempMeasurement.push_back(buf);
+					}
+					// only need to execute this code once to set dataheadings
+					if (counter == 0)
+					{
+						if (tempMeasurement.size() == 4)
+						{
+							tempDataHeadings[i] = "Value   Err   Systerr   Date";
+						}
+						else
+						{
+							tempDataHeadings[i] = "Value    Date";
+						}
 					}
 					else
+					// now we compare other measurements to the first to ensure same type down columns
 					{
-						tempDataHeadings[i] = "Value    Date";
+						if ((tempDataHeadings[i].length() < 13 && tempMeasurement.size() == 4) || (tempDataHeadings[i].length() > 13 && tempMeasurement.size() == 2))
+						{
+							throw("Measurements in a column should be of the same type");
+						}
 					}
+					rowMeasurement.push_back(std::move(addMeasurement(tempMeasurement)));
+					tempMeasurement.clear();
+					isGood = 'y';	// flag set if no error is caught
+				}
+				// if the data is in an invalid format (throw from addMeasurement)
+				catch (const char* msg) {
+					cerr << msg << endl;
+					std::cin.clear();
+					isGood = 'n';	// set flag so that try-catch loop will retry
+				}
+
+				if (isGood != 'n')	// we only push back the row if data has been added successfully
+				{
+					tempExp.measurementContainer_.emplace_back(std::move(rowMeasurement));
+					rowMeasurement.clear();
+					break;
 				}
 				else
-				// now we compare other measurements to the first to ensure same type down columns
 				{
-					if ((tempDataHeadings[i].length() < 13 && tempMeasurement.size() == 4) || (tempDataHeadings[i].length() > 13 && tempMeasurement.size() == 2))
-					{
-						throw("Measurements in a column should be of the same type");
-					}
+					rowMeasurement.clear();
+					tempMeasurement.clear();
 				}
-				rowMeasurement.push_back(std::move(addMeasurement(tempMeasurement)));
-				tempMeasurement.clear();
-			}
-			// if the data is in an invalid format (throw from addMeasurement)
-			catch (const char* msg) {
-				cerr << msg << endl;
-				std::cin.clear();
-				break;
-			}
-			tempExp.measurementContainer_.emplace_back(std::move(rowMeasurement));
-			rowMeasurement.clear();
-			counter++;
+			} while (isGood = 'n');
 		}
-		
+		counter++;
 		std::cout << "Continue to add data? (Current rows: " << counter << ") (Y/N): ";
 		std::cin >> loopFlag;
 		std::cin.ignore();
@@ -286,15 +326,18 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 		return;
 	}
 
-	u.insert(std::make_pair(tempName, std::move(tempExp)));
+	// move object to map
+	u[tempName] = std::move(tempExp);
 	u[tempName].dataHeadings_ = tempDataHeadings;
 }
 
+// print experiment to console
 int Experiment::printExperiment()
 {
 	const char seperator = ' ';
 	const int width = WIDTH;
 	
+	// extra spacing to offset the row numbers
 	std::cout << endl;
 	std::cout << "   ";
 	// print out header numbers
@@ -322,10 +365,11 @@ int Experiment::printExperiment()
 
 	// print measurements
 	int rowcount{ 1 };
+	// iterating over the container
 	for (auto vec_iter = measurementContainer_.begin(); vec_iter != measurementContainer_.end(); ++vec_iter)
 	{
 		std::cout << rowcount << "  ";
-		// iterating over the row
+		// iterating over the measurements in the row
 		for (vector<std::shared_ptr<Measurement>>::iterator meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
 		{
 			(*meas_it)->printInfo(seperator);
@@ -355,6 +399,7 @@ int Experiment::printExperiment()
 
 int Experiment::editExperiment()
 {
+	// print the experiment first for user reference
 	cout << endl;
 	printExperiment();
 
@@ -365,23 +410,30 @@ int Experiment::editExperiment()
 	char flag = ('y');
 	const char seperator = ' ';
 	const int width = WIDTH;
-	int check;
+	int check{ 0 };
+	int checkInputType{ 0 };
 
 	do {
 		cout << "\nEdit which measurement? (Row, column): ";
 		std::getline(cin, tempCoord);
-		// need to sanitise coordinate input
+		// need to sanitise coordinate input - check for comma somewhere in string
 		if (tempCoord.find(',') != std::string::npos)
 		{
+			// read string, split the string by comma and push back
 			std::stringstream ss(tempCoord);
 			while (ss.good())
 			{
 				std::string substr;
 				getline(ss, substr, ',');
-
-				if (stoi(substr) - 1 < static_cast<int>(headings_.size()))
+				// check input is numerical
+				if (!substr.empty() && substr.find_first_not_of("123456789") == std::string::npos)
 				{
-					coordinates.push_back(stoi(substr) - 1);
+					// check range is valid
+					if (stoi(substr) - 1 < static_cast<int>(headings_.size()))
+					{
+						// -1 as user inputs starting from 1 for readability
+						coordinates.push_back(stoi(substr) - 1);
+					}
 				}
 				else
 				{
@@ -397,23 +449,22 @@ int Experiment::editExperiment()
 		}
 
 		measurementContainer_[coordinates[0]][coordinates[1]]->printInfo(seperator);
-		cout << endl << "\nEnter new data, space delimited (date will update automatically): ";
-
+		cout << endl << "\nEnter new data, space delimited (date will update automatically). Example format: \"20 23 3\"  or  \"Red\" : ";
 		std::getline(std::cin, tempStr);
 		std::stringstream ss2(tempStr);
 		while (ss2 >> buf)
 		{
 			tempMeasurement.push_back(buf);
 		}
-
+		// check if operation completed successfully
 		check = measurementContainer_[coordinates[0]][coordinates[1]]->updateInfo(tempMeasurement);
 		tempMeasurement.clear();
 		coordinates.clear();
 
 		// we will only print the experiment if any data has changed; updateInfo returns -1 if invalid
-		if (check = 1)
+		if (check == 1)
 		{
-			cout << endl;
+			cout << "Measurement edited successfully" << endl;
 			printExperiment();
 		}
 		cout << "\nContinue editing experiment? (Y/N): ";
@@ -421,6 +472,7 @@ int Experiment::editExperiment()
 		std::cin.ignore();
 
 	} while (tolower(flag) == 'y');
+	
 	check = saveExperiment();
 	if (check == 1)
 	{
