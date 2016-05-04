@@ -129,7 +129,7 @@ int main()
 			ptr = user.find(fileName);
 			if (ptr != user.end())
 			{
-				ptr->second.saveExperiment();
+				ptr->second.saveExperiment('e');
 				break;
 			}
 			else

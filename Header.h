@@ -101,7 +101,7 @@ namespace datans
 		friend void addExperiment(std::map<std::string, Experiment> &u);
 		int printExperiment();
 		int editExperiment();
-		int saveExperiment();
+		int saveExperiment(char flag);
 		int deleteExperiment(std::map<std::string, Experiment> &u);
 	};
 

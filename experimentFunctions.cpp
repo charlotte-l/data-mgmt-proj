@@ -102,6 +102,7 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 	std::string tempLine, tempLine2, buf;
 	std::vector<std::string> tempHeadings, tempDataHeadings, tempMeasurement;
 	std::vector<shared_ptr<Measurement>> rowMeasurement;
+	std::string filePath;
 
 	// reading from data folder
 	if (readFlag == 'r')
@@ -115,6 +116,7 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 	{
 		dataFile.open(n);
 		// reassign n to be just the name
+		filePath = n;
 		n = fileNameFromPath(n);
 	}
 
@@ -189,7 +191,7 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 		if (readFlag == 'f')
 		{
 			// for checking file exists and can be wrote to
-			int check = tempExp.saveExperiment();
+			int check = tempExp.saveExperiment('f');
 			if (check != 1)
 			{
 				return;
@@ -319,7 +321,7 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 	} while (loopFlag == 'Y' || loopFlag == 'y');
 
 	// save the experiment locally
-	int check = tempExp.saveExperiment();
+	int check = tempExp.saveExperiment('s');
 	if (check != 1)
 	{
 		std::cout << "Could not save experiment to file.\n";
@@ -473,7 +475,8 @@ int Experiment::editExperiment()
 
 	} while (tolower(flag) == 'y');
 	
-	check = saveExperiment();
+	// update the experiment file in /data
+	check = saveExperiment('s');
 	if (check == 1)
 	{
 		return 1;
@@ -485,16 +488,44 @@ int Experiment::editExperiment()
 	}
 }
 
-int Experiment::saveExperiment()
+int Experiment::saveExperiment(char flag)
 {
-	std::string filename_ = name_ + ".txt";
-	if (isFileExist(name_) == true)
-	{
-		char flag;
-		std::cout << "File " << filename_ << " already exists. Overwrite? (Y/N): ";
-		std::cin >> flag;
+	char typeFlag;
+	std::string filename;
 
-		if (flag == 'N' || flag == 'n')
+	if (flag == 'e')
+	{
+		// check how we are saving the file
+		cout << "Save to which format? [T]ext / [C]SV / [L]atex: ";
+		cin >> typeFlag;
+	
+		switch (tolower(typeFlag))
+		{
+		case 't':
+			filename = name_ + ".txt";
+			break;
+		case 'c':
+			filename = name_ + ".csv";
+			break;
+		case 'l':
+			filename = name_ + ".tex";
+			break;
+		}
+	}
+
+	else
+	{
+		filename = name_ + ".txt";
+		typeFlag = 't';
+	}
+
+	if (isFileExist(filename) == true)
+	{
+		char saveFlag;
+		std::cout << "File " << filename << " already exists. Overwrite? (Y/N): ";
+		std::cin >> saveFlag;
+
+		if (saveFlag == 'N' || saveFlag == 'n')
 		{
 			std::cout << "\nSave operation aborted.\n";
 			return -1;
@@ -502,28 +533,124 @@ int Experiment::saveExperiment()
 	}
 
 	// if file doesn't exist (or user chooses to overwrite)
-	ofstream dataFile;
-	char tempflag{ 't' };
+	ofstream dataFile(".//data//" + filename);
 
-	dataFile.open(".//data//" + filename_);
 	if (dataFile.is_open())
 	{
-		for (auto vec_iter = headings_.begin(); vec_iter != headings_.end(); ++vec_iter)
+		switch (typeFlag)
 		{
-			dataFile << (*vec_iter) << "\t";
-		}
-		dataFile << std::endl;
-
-		// passed by reference so we can access the info properly
-		for (auto& vec_iter = measurementContainer_.begin(); vec_iter != measurementContainer_.end(); ++vec_iter)
-		{
-			for (auto& meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+		case 't':
+			// save headings
+			for (auto vec_iter = headings_.begin(); vec_iter != headings_.end(); ++vec_iter)
 			{
-				dataFile << (*meas_it)->saveInfo(tempflag);
+				dataFile << (*vec_iter) << "\t";
 			}
-			dataFile << endl;
+			dataFile << std::endl;
+
+			// passed by reference so we can access the info properly
+			// iterate over container rows
+			for (auto& vec_iter = measurementContainer_.begin(); vec_iter != measurementContainer_.end(); ++vec_iter)
+			{
+				// iterate over individual rows
+				for (auto& meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+				{
+					dataFile << (*meas_it)->saveInfo(typeFlag);	// flag determines how file is saved
+				}
+				dataFile << endl;
+			}
+			break;
+		
+		case 'c':
+			// save headings
+			for (auto vec_iter = headings_.begin(); vec_iter != headings_.end(); ++vec_iter)
+			{
+				dataFile << (*vec_iter) << "\t";
+			}
+			dataFile << std::endl;
+
+			for (auto& vec_iter = measurementContainer_.begin(); vec_iter != measurementContainer_.end(); ++vec_iter)
+			{
+				for (auto& meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+				{
+					dataFile << (*meas_it)->saveInfo(typeFlag);
+				}
+				dataFile << endl;
+			}
+			break;
+		
+		case 'l':
+			std::string buf;
+			std::string tempStr;
+			// latex formatting has some requirements for the document
+			dataFile << "\\documentclass{article}" << endl;
+			dataFile << "\\newcommand\\tab[1][0.8cm]{\\hspace*{#1}}" << endl;
+			dataFile << "\\begin{document}" << endl;
+			dataFile << "\\title{" << name_ << "}" << endl;
+			dataFile << "\\begin{center}" << endl;
+			
+			dataFile << "\\begin{tabular}{";
+			for (size_t i = 0; i < headings_.size(); ++i)
+			{
+				dataFile << "|c";
+			}
+			dataFile << "|}" << endl;
+			dataFile << "\\hline" << endl;
+				
+			int counter{ 0 };	// to make sure & not at the end of line
+			for (auto vec_iter = headings_.begin(); vec_iter != headings_.end(); ++vec_iter)
+			{
+				dataFile << (*vec_iter);
+				if (counter != (distance(headings_.begin(), headings_.end()))-1)
+				{
+					dataFile << " & ";
+				}
+				++counter;
+			}
+			dataFile << "\\\\ [0.5ex]" << std::endl;
+			dataFile << "\\hline" << endl;
+			counter = 0;	// to make sure & not at the end of line
+			for (auto vec_iter = dataHeadings_.begin(); vec_iter != dataHeadings_.end(); ++vec_iter)
+			{
+				// open stringstream on (*vec_iter)
+				istringstream ss(*vec_iter);
+				while (ss >> buf)
+				{
+					dataFile << buf;
+					dataFile << "\\tab ";
+				}
+				
+				if (counter != (distance(dataHeadings_.begin(), dataHeadings_.end())) - 1)
+				{
+					dataFile << " & ";
+				}
+				++counter;
+			}
+
+			dataFile << "\\\\ [0.5ex]" << std::endl;
+			dataFile << "\\hline\\hline" << endl;			
+			for (auto& vec_iter = measurementContainer_.begin(); vec_iter != measurementContainer_.end(); ++vec_iter)
+			{
+				counter = 0;	// to make sure & not at the end of line
+				for (auto& meas_it = (*vec_iter).begin(); meas_it != (*vec_iter).end(); ++meas_it)
+				{
+					dataFile << (*meas_it)->saveInfo(typeFlag);
+					if (counter != (distance((*vec_iter).begin(), (*vec_iter).end())) - 1)
+					{
+						dataFile << " & ";
+					}
+					++counter;
+				}
+				dataFile << "\\\\" << endl;
+				dataFile << "\\hline" << endl;
+			}
+			dataFile << "\\end{tabular}" << endl;
+			dataFile << "\\end{center}" << endl;
+			dataFile << "\\end{document}" << endl;
+			break;
 		}
+
 		dataFile.close();
+		cout << "File " << filename << " saved successfully" << endl;
 		return 1;
 	}
 	else
