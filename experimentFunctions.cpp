@@ -139,53 +139,69 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 		while (std::getline(dataFile, tempLine))
 		{
 			int colCount{ 0 };
-			// we read the whole line, then each measurement is tab delineated, so split into n strings (each string is a measurement)
-			// then create each measurement and push that back into a row. row is then pushed back into the measurement container
-			std::stringstream ss(tempLine);
-			while (std::getline(ss, tempLine2, '\t'))
-			{
-				std::stringstream ss2(tempLine2);
-				while (ss2 >> buf)
+			try {
+				// we read the whole line, then each measurement is tab delineated, so split into n strings (each string is a measurement)
+				// then create each measurement and push that back into a row. row is then pushed back into the measurement container
+				std::stringstream ss(tempLine);
+				while (std::getline(ss, tempLine2, '\t'))
 				{
-					tempMeasurement.push_back(buf);
-				}			
-				// only execute once to set dataheadings
-				if (counter == 0)
-				{
-					if (tempMeasurement.size() == 4)
+					std::stringstream ss2(tempLine2);
+					while (ss2 >> buf)
 					{
-						tempDataHeadings[colCount] = "Val    Err    SEerr  Date        ";
+						tempMeasurement.push_back(buf);
+					}
+
+					if (tempMeasurement.size() > 4 || tempMeasurement.size() == 3)
+					{
+						throw("Measurement should be in one of the specified formats");
+					}
+
+					// only execute once to set dataheadings
+					if (counter == 0)
+					{
+						if (tempMeasurement.size() == 4)
+						{
+							tempDataHeadings[colCount] = "Val    Err    SEerr  Date        ";
+						}
+						else if (tempMeasurement.size() == 2)
+						{
+							tempDataHeadings[colCount] = "Val                 Date        ";
+						}
+						else
+						{
+							perror("Data should be in format specified");
+						}
 					}
 					else
+						// compare other measurements to the first to ensure same type down columns
 					{
-						tempDataHeadings[colCount] = "Val                 Date        ";
+						if ((tempDataHeadings[colCount].length() < 13 && tempMeasurement.size() == 4) || (tempDataHeadings[colCount].length() > 13 && tempMeasurement.size() == 2))
+						{
+							throw("Measurements in a column should be of the same type");
+						}
 					}
-				}
-				else
-				// compare other measurements to the first to ensure same type down columns
-				{
-					if ((tempDataHeadings[colCount].length() < 13 && tempMeasurement.size() == 4) || (tempDataHeadings[colCount].length() > 13 && tempMeasurement.size() == 2))
-					{
-						perror("\nMeasurements in a column should be of the same type\n");
+					colCount++;
+					// try catch to find invalid input; no recovery (user must fix their file)
+					try {
+						rowMeasurement.push_back(std::move(addMeasurement(tempMeasurement)));
+					}
+					catch (const char* msg) {
+						cerr << msg;
+						cerr << "Check format of file " << n << " and try again." << endl;
+						std::cin.clear();
 						return;
 					}
+					tempMeasurement.clear();
 				}
-				colCount++;
-				// try catch to find invalid input; no recovery (user must fix their file)
-				try {
-					rowMeasurement.push_back(std::move(addMeasurement(tempMeasurement)));
-				}
-				catch (const char* msg) {
-					cerr << msg;
-					cerr << "Check format of file " << n << " and try again." << endl;
-					std::cin.clear();
-					return;
-				}
-				tempMeasurement.clear();
+				tempExp.measurementContainer_.emplace_back(std::move(rowMeasurement));
 			}
-			tempExp.measurementContainer_.emplace_back(std::move(rowMeasurement));
-		}
+			catch (const char* msg) {
+				cerr << msg << endl;
+				std::cin.clear();
+			}
+		}		
 		tempHeadings.clear();
+
 
 		// if file is from openFileDialogue, save the experiment locally to data folder
 		if (readFlag == 'f')
@@ -269,6 +285,12 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 					{
 						tempMeasurement.push_back(buf);
 					}
+
+					if (tempMeasurement.size() > 4 || tempMeasurement.size() == 3)
+					{
+						throw("Measurement should be in one of the specified formats");
+					}
+
 					// only need to execute this code once to set dataheadings
 					if (counter == 0)
 					{
@@ -276,9 +298,13 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 						{
 							tempDataHeadings[i] = "Value   Err   Systerr   Date";
 						}
-						else
+						else if (tempMeasurement.size() == 2)
 						{
 							tempDataHeadings[i] = "Value    Date";
+						}
+						else
+						{
+							cerr << "Data of invalid size";
 						}
 					}
 					else
@@ -311,7 +337,7 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 					rowMeasurement.clear();
 					tempMeasurement.clear();
 				}
-			} while (isGood = 'n');
+			} while (isGood == 'n');
 		}
 		counter++;
 		std::cout << "Continue to add data? (Current rows: " << counter << ") (Y/N): ";

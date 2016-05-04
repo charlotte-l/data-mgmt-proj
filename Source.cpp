@@ -116,7 +116,7 @@ int main()
 			}
 			else
 			{
-				cout << "Cannot find experiment" << fileName << endl;
+				cout << "Cannot find experiment " << fileName << endl;
 				break;
 			}
 			break;
@@ -134,7 +134,7 @@ int main()
 			}
 			else
 			{
-				cout << "Cannot find experiment" << fileName << endl;
+				cout << "Cannot find experiment " << fileName << endl;
 				break;
 			}
 			break;
@@ -152,7 +152,7 @@ int main()
 			}
 			else
 			{
-				cout << "Cannot find experiment" << fileName << endl;
+				cout << "Cannot find experiment " << fileName << endl;
 				break;
 			}
 			break;
@@ -166,8 +166,10 @@ int main()
 			cout << "Command not recognised" << endl;
 			cin.clear();
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			cout << endl << endl << endl << endl;
 			break;		
 		}
+		cout << endl << endl << endl << endl;
 	} while (menu == true);
 	
 	return 0;

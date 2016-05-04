@@ -1,16 +1,21 @@
-﻿Build started 04/05/2016 12:47:09.
-     1>Project "d:\libraries\documents\visual studio 2013\Projects\FinalProj\FinalProj\FinalProj.vcxproj" on node 2 (Build target(s)).
+﻿Build started 04/05/2016 13:14:13.
+     1>Project "d:\libraries\documents\visual studio 2013\Projects\FinalProj\FinalProj\FinalProj.vcxproj" on node 2 (Rebuild target(s)).
      1>ClCompile:
-         D:\Program Files\Visual Studio 2013\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt miscFunctions.cpp
+         D:\Program Files\Visual Studio 2013\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D CODE_ANALYSIS /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze /analyze:plugin"D:\Program Files\Visual Studio 2013\VC\\bin\localespc.dll" /errorReport:prompt   /analyze:quiet experimentFunctions.cpp miscFunctions.cpp Source.cpp measurementFunctions.cpp
+         measurementFunctions.cpp
+         Source.cpp
          miscFunctions.cpp
+         experimentFunctions.cpp
+         Running Code Analysis for C/C++...
+         Generating Code...
        Link:
          D:\Program Files\Visual Studio 2013\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.lib" /MACHINE:X86 Debug\experimentFunctions.obj
          Debug\miscFunctions.obj
          Debug\Source.obj
          Debug\measurementFunctions.obj
          FinalProj.vcxproj -> d:\libraries\documents\visual studio 2013\Projects\FinalProj\Debug\FinalProj.exe
-     1>Done Building Project "d:\libraries\documents\visual studio 2013\Projects\FinalProj\FinalProj\FinalProj.vcxproj" (Build target(s)).
+     1>Done Building Project "d:\libraries\documents\visual studio 2013\Projects\FinalProj\FinalProj\FinalProj.vcxproj" (Rebuild target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:01.04
+Time Elapsed 00:00:34.60

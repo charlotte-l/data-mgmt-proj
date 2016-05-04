@@ -8,7 +8,7 @@ std::vector<std::string> readDir()
 {
 	std::vector<std::wstring> wnames;	// wide char version
 	std::vector <std::string> names;
-	wchar_t file_path[250];
+	wchar_t file_path[256];
 
 	swprintf(file_path, 256, L"%s/*.txt", L".//data//");	// only want .txt files
 	WIN32_FIND_DATA foundFile;
