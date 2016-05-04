@@ -65,16 +65,41 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 {
 	int vectorSize = v.size();
 	std::shared_ptr<Measurement> ptr;	// base class pointer
+	std::string buf;
+	int checkNum;
 
 	switch (vectorSize)
 	{
 	// size 4 = double type
 	case 4:
 		{
-			// convert to relevant type
-			double tempVal = stod(v[0]);
-			double tempErr = stod(v[1]);
-			double tempSyst = stod(v[2]);
+			double tempVal, tempErr, tempSyst;
+			try {
+				// convert to relevant type
+				tempVal = stod(v[0]);
+				tempErr = stod(v[1]);
+				tempSyst = stod(v[2]);
+			}
+			catch (const std::invalid_argument& ia) {
+				std::cin.clear();
+				cerr << ia.what() << ": ";
+				throw "Numerical format should have numerical values only\n";
+			}
+
+			// date validation
+			istringstream ss(v[3]);
+			while (getline(ss, buf, '/'))
+			{
+				try {
+					checkNum = stoi(buf);
+				}
+				catch (const std::invalid_argument& ia) {
+					std::cin.clear();
+					cerr << ia.what() << ": ";
+					throw "Date in invalid format\n";
+				}
+			}
+
 			// create the measurement
 			ptr.reset(new NumMeasure(tempVal, tempErr, tempSyst, v[3]));
 			break;
@@ -82,6 +107,20 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 	// size 2 = string type
 	case 2:
 		{
+			// date validation
+			istringstream ss(v[1]);
+			while (getline(ss, buf, '/'))
+			{
+				try {
+					checkNum = stoi(buf);
+				}
+				catch (const std::invalid_argument& ia) {
+					std::cin.clear();
+					cerr << ia.what() << ": ";
+					throw "Date in invalid format\n";
+				}
+			}
+
 			ptr.reset(new StringMeasure(v[0], v[1]));
 			break;
 		}	
@@ -207,7 +246,7 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 		if (readFlag == 'f')
 		{
 			// for checking file exists and can be wrote to
-			int check = tempExp.saveExperiment('f');
+			int check = tempExp.saveExperiment('s');
 			if (check != 1)
 			{
 				return;
@@ -278,7 +317,7 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 			do {
 				try {
 					std::cout << "Enter data " << counter + 1 << " for " << tempHeadings[i] << " (space delimited).";
-					std::cout << " Example formats: \"10 2 2 2016-05-03\"  or  \"Red 2016-05-03\" :\n";
+					std::cout << " Example formats: \"10 2 2 2016/05/03\"  or  \"Red 2016/05/03\" :\n";
 					std::getline(std::cin, tempStr);
 					std::stringstream ss(tempStr);
 					while (ss >> buf)
@@ -300,7 +339,7 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 						}
 						else if (tempMeasurement.size() == 2)
 						{
-							tempDataHeadings[i] = "Value    Date";
+							tempDataHeadings[i] = "Value               Date";
 						}
 						else
 						{
@@ -439,6 +478,7 @@ int Experiment::editExperiment()
 	const char seperator = ' ';
 	const int width = WIDTH;
 	int check{ 0 };
+	int checkSave{ 0 };
 	int checkInputType{ 0 };
 
 	do {
@@ -502,8 +542,11 @@ int Experiment::editExperiment()
 	} while (tolower(flag) == 'y');
 	
 	// update the experiment file in /data
-	check = saveExperiment('s');
 	if (check == 1)
+	{
+		checkSave = saveExperiment('s');
+	}
+	if (checkSave == 1)
 	{
 		return 1;
 	}
@@ -536,10 +579,13 @@ int Experiment::saveExperiment(char flag)
 		case 'l':
 			filename = name_ + ".tex";
 			break;
+		default:
+			cout << "Command not recognised\n";
+			return -1;
 		}
 	}
 
-	else
+	else if (flag == 's')
 	{
 		filename = name_ + ".txt";
 		typeFlag = 't';

@@ -36,10 +36,15 @@ std::vector<std::string> readDir()
 	{
 		// default location ./data
 		const wchar_t * path = L".//data//";
-		if (!CreateDirectory(path, NULL) ||
-			ERROR_ALREADY_EXISTS == GetLastError())		// will throw error if directory exists but is just empty or improper permissions
+		if (!CreateDirectory(path, NULL))
 		{
 			cerr << "Could not create data directory or directory is empty" << endl;
+		}
+		else if (ERROR_ALREADY_EXISTS == GetLastError() || ERROR_ACCESS_DENIED == GetLastError())
+		{
+			// absolute failure - program cannot and should not continue, exit main ASAP
+			perror("Folder permissions do not allow creation of data directory!");
+			WM_CLOSE;
 		}
 		else
 		{

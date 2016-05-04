@@ -1,4 +1,4 @@
-﻿Build started 04/05/2016 14:13:58.
+﻿Build started 04/05/2016 19:40:53.
      1>Project "d:\libraries\documents\visual studio 2013\Projects\FinalProj\FinalProj\FinalProj.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          D:\Program Files\Visual Studio 2013\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt experimentFunctions.cpp
@@ -15,4 +15,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.92
+Time Elapsed 00:00:02.40

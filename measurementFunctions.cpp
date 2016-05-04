@@ -55,11 +55,18 @@ int NumMeasure::updateInfo(std::vector<std::string> &v)
 	// numerical type measurement
 	if (v.size() == 3)
 	{
-		value_ = stod(v[0]);
-		error_ = stod(v[1]);
-		systError_ = stod(v[2]);
-		date_ = currentDate();
-		return 1;
+		try {
+			value_ = stod(v[0]);
+			error_ = stod(v[1]);
+			systError_ = stod(v[2]);
+			date_ = currentDate();
+			return 1;
+		}
+		catch (const std::invalid_argument& ia) {
+			std::cin.clear();
+			cerr << ia.what() << ": ";
+			return -1;
+		}
 	}
 	else
 	{

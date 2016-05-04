@@ -40,7 +40,7 @@ int main()
 	std::map<std::string, Experiment>::iterator ptr;
 
 	// user menu
-	cout << "Welcome to DataManager. Select an option:" << endl;
+	cout << "\nWelcome to DataManager. Select an option:" << endl;
 	do
 	{
 		cout << endl;
@@ -169,7 +169,7 @@ int main()
 			cout << endl << endl << endl << endl;
 			break;		
 		}
-		cout << endl << endl << endl << endl;
+		cout << endl << endl;
 	} while (menu == true);
 	
 	return 0;

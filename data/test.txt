@@ -1,2 +1,0 @@
-header1	header2	
-poo party	21.000000 23.000000 45.000000 date	
