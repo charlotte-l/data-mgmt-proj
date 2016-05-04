@@ -70,5 +70,5 @@ void datans::printExperimentList(std::map<std::string, Experiment> user)
 	{
 		std::cout << it->first << ", ";
 	}
-	cout << "\b\b): ";
+	cout << "\b\b) (q to quit): ";
 }

@@ -274,8 +274,13 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 	std::vector<std::string> tempHeadings, tempDataHeadings;
 	char existsFlag;
 
-	std::cout << "Enter experiment name: ";
+	std::cout << "Enter experiment name (q to quit): ";
 	std::getline(std::cin, tempName);
+	if (tempName == "q")
+	{
+		cout << "Aborting...\n";
+		return;
+	}
 
 	// check if the experiment exists, if so can overwrite, if not exit
 	std::map<std::string, Experiment>::iterator ptr;
@@ -287,13 +292,18 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 		cin.ignore();
 		if (tolower(existsFlag) == 'n')
 		{
-			cout << "Aborting adding of experiment.\n";
+			cout << "Aborting...\n";
 			return;
 		}
 	}
 
-	std::cout << "\nEnter headings, space delimited - units in () i.e. Voltage(V): ";
+	std::cout << "\nEnter headings, space delimited - units in () i.e. Voltage(V) (q to quit): ";
 	std::getline(std::cin, tempStr);
+	if (tempStr == "q")
+	{
+		cout << "Aborting...\n";
+		return;
+	}
 	std::stringstream ss(tempStr);
 	while (ss >> buf)
 	{
@@ -317,8 +327,13 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 			do {
 				try {
 					std::cout << "Enter data " << counter + 1 << " for " << tempHeadings[i] << " (space delimited).";
-					std::cout << " Example formats: \"10 2 2 2016/05/03\"  or  \"Red 2016/05/03\" :\n";
+					std::cout << " Example formats: \"10 2 2 2016/05/03\"  or  \"Red 2016/05/03\" (q to quit):\n";
 					std::getline(std::cin, tempStr);
+					if (tempName == "q")
+					{
+						cout << "Aborting...\n";
+						return;
+					}
 					std::stringstream ss(tempStr);
 					while (ss >> buf)
 					{
@@ -482,8 +497,13 @@ int Experiment::editExperiment()
 	int checkInputType{ 0 };
 
 	do {
-		cout << "\nEdit which measurement? (Row, column): ";
+		cout << "\nEdit which measurement? (Row, column) (q to quit): ";
 		std::getline(cin, tempCoord);
+		if (tempCoord == "q")
+		{
+			cout << "Aborting...\n";
+			return -1;
+		}
 		// need to sanitise coordinate input - check for comma somewhere in string
 		if (tempCoord.find(',') != std::string::npos)
 		{
@@ -517,8 +537,14 @@ int Experiment::editExperiment()
 		}
 
 		measurementContainer_[coordinates[0]][coordinates[1]]->printInfo(seperator);
-		cout << endl << "\nEnter new data, space delimited (date will update automatically). Example format: \"20 23 3\"  or  \"Red\" : ";
+		cout << endl << "\nEnter new data, space delimited (date will update automatically).";
+		cout << "Example format: \"20 23 3\"  or  \"Red\" (q to quit): ";
 		std::getline(std::cin, tempStr);
+		if (tempStr == "q")
+		{
+			cout << "Aborting...\n";
+			return -1;
+		}
 		std::stringstream ss2(tempStr);
 		while (ss2 >> buf)
 		{
@@ -565,7 +591,7 @@ int Experiment::saveExperiment(char flag)
 	if (flag == 'e')
 	{
 		// check how we are saving the file
-		cout << "Save to which format? [T]ext / [C]SV / [L]atex: ";
+		cout << "Save to which format? [T]ext / [C]SV / [L]atex (q to quit): ";
 		cin >> typeFlag;
 	
 		switch (tolower(typeFlag))
@@ -579,6 +605,9 @@ int Experiment::saveExperiment(char flag)
 		case 'l':
 			filename = name_ + ".tex";
 			break;
+		case 'q':
+			cout << "Aborting...\n";
+			return -1;
 		default:
 			cout << "Command not recognised\n";
 			return -1;

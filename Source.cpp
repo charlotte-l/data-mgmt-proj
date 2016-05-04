@@ -55,25 +55,38 @@ int main()
 		switch (menuOption)
 		{
 		case '1':
-			cout << "Select an experiment to view (options: ";
-			printExperimentList(user);
-			getline(cin, fileName);
-			// find the object - if found, print it's info
-			ptr = user.find(fileName);
-			if (ptr != user.end())
+			if (!user.empty())
 			{
-				ptr->second.printExperiment();
-				break;
+				cout << "Select an experiment to view (options: ";
+				printExperimentList(user);
+				getline(cin, fileName);
+				if (fileName == "q")
+				{
+					cout << "Aborting...\n";
+					break;
+				}
+				// find the object - if found, print it's info
+				ptr = user.find(fileName);
+				if (ptr != user.end())
+				{
+					ptr->second.printExperiment();
+					break;
+				}
+				else
+				{
+					cout << "Cannot find experiment " << fileName << endl;
+					break;
+				}
 			}
 			else
 			{
-				cout << "Cannot find experiment " << fileName << endl;
+				cout << "No previous experiments found\n";
 				break;
 			}
 			break;
 			
 		case '2':
-			cout << "Add experiment [m]anually or from [f]ile: ";
+			cout << "Add experiment [m]anually or from [f]ile (q to quit): ";
 			cin >> addType; cin.ignore();
 			switch (tolower(addType))
 			{
@@ -95,6 +108,9 @@ int main()
 				// flag f to read from file
 				readExperiment(filePath, user, 'f');
 				break;
+			case 'q':
+				cout << "Aborting...\n";
+				break;
 			default:
 				cout << "Command not recognised.\n";
 				cin.clear();
@@ -104,55 +120,94 @@ int main()
 			break;
 
 		case '3':
-			cout << "Select an experiment to edit (options: ";
-			printExperimentList(user);
-			getline(cin, fileName);
-			// check if object exists, if so move to editExperiment routine
-			ptr = user.find(fileName);
-			if (ptr != user.end())
+			if (!user.empty())
 			{
-				ptr->second.editExperiment();
-				break;
+				cout << "Select an experiment to edit (options: ";
+				printExperimentList(user);
+				getline(cin, fileName);
+				if (fileName == "q")
+				{
+					cout << "Aborting...\n";
+					break;
+				}
+				// check if object exists, if so move to editExperiment routine
+				ptr = user.find(fileName);
+				if (ptr != user.end())
+				{
+					ptr->second.editExperiment();
+					break;
+				}
+				else
+				{
+					cout << "Cannot find experiment " << fileName << endl;
+					break;
+				}
 			}
 			else
 			{
-				cout << "Cannot find experiment " << fileName << endl;
+				cout << "No previous experiments found\n";
 				break;
 			}
 			break;
 
 		case '4':
-			cout << "Select an experiment to export (options: ";
-			printExperimentList(user);
-			getline(cin, fileName);
-			// check if object exists, if so move to saveExperiment routine
-			ptr = user.find(fileName);
-			if (ptr != user.end())
+			if (!user.empty())
 			{
-				ptr->second.saveExperiment('e');
-				break;
+				cout << "Select an experiment to export (options: ";
+				printExperimentList(user);
+				getline(cin, fileName);
+				if (fileName == "q")
+				{
+					cout << "Aborting...\n";
+					break;
+				}
+				// check if object exists, if so move to saveExperiment routine
+				ptr = user.find(fileName);
+				if (ptr != user.end())
+				{
+					ptr->second.saveExperiment('e');
+					break;
+				}
+				else
+				{
+					cout << "Cannot find experiment " << fileName << endl;
+					break;
+				}
 			}
 			else
 			{
-				cout << "Cannot find experiment " << fileName << endl;
+				cout << "No previous experiments found\n";
 				break;
 			}
 			break;
 
 		case '5':
-			cout << "Enter name of experiment to delete (options: ";
-			printExperimentList(user);
-			getline(cin, fileName);
-			ptr = user.find(fileName);
-			// check if object exists, if so move to deleteExperiment routine
-			if (ptr != user.end())
+			if (!user.empty())
 			{
-				ptr->second.deleteExperiment(user);
-				break;
+				cout << "Enter name of experiment to delete (options: ";
+				printExperimentList(user);
+				getline(cin, fileName);
+				if (fileName == "q")
+				{
+					cout << "Aborting...\n";
+					break;
+				}
+				ptr = user.find(fileName);
+				// check if object exists, if so move to deleteExperiment routine
+				if (ptr != user.end())
+				{
+					ptr->second.deleteExperiment(user);
+					break;
+				}
+				else
+				{
+					cout << "Cannot find experiment " << fileName << endl;
+					break;
+				}
 			}
 			else
 			{
-				cout << "Cannot find experiment " << fileName << endl;
+				cout << "No previous experiments found\n";
 				break;
 			}
 			break;
