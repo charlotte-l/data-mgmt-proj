@@ -64,9 +64,9 @@ bool isFileExist(std::string &n)
 }
 
 // print the list of experiments in memory
-void datans::printExperimentList(std::map<std::string, Experiment> user)
+void datans::printExperimentList(std::map<std::string, Experiment> u)
 {
-	for (std::map<std::string, Experiment>::iterator it = user.begin(); it != user.end(); ++it)
+	for (std::map<std::string, Experiment>::iterator it = u.begin(); it != u.end(); ++it)
 	{
 		std::cout << it->first << ", ";
 	}
