@@ -13,7 +13,6 @@
 #include<memory>
 #include<map>
 #include<algorithm>
-#include"dirent.h"
 #include <windows.h>
 #include<locale>
 #include<codecvt>
@@ -58,7 +57,7 @@ namespace datans
 		~NumMeasure() {}
 		// getters and setters
 		void printInfo(const char &seperator);
-		std::string saveInfo(char &flag);	// flag determines saving as .txt, .csv or .tex
+		std::string saveInfo(char &saveFlag);	// flag determines saving as .txt, .csv or .tex
 		double getError() { return error_ + systError_; }
 		double getValue() { return value_; }
 		int updateInfo(std::vector<std::string> &v);
@@ -75,7 +74,7 @@ namespace datans
 		~StringMeasure(){}
 		// getters and setters
 		void printInfo(const char &seperator);
-		std::string saveInfo(char &flag);	// flag determines saving as .txt, .csv or .tex
+		std::string saveInfo(char &saveFlag);	// flag determines saving as .txt, .csv or .tex
 		double getError() { return 0; }
 		double getValue() { return 0; } // this function is only called in error calculation and so returns 0
 		int updateInfo(std::vector<std::string> &v);
@@ -101,11 +100,11 @@ namespace datans
 		friend void addExperiment(std::map<std::string, Experiment> &u);
 		int printExperiment();
 		int editExperiment();
-		int saveExperiment(char flag);
+		int saveExperiment(char saveFlag);
 		int deleteExperiment(std::map<std::string, Experiment> &u);
 	};
 
-	void printExperimentList(std::map<std::string, Experiment> user);
+	void printExperimentList(std::map<std::string, Experiment> u);
 }
 
 namespace
@@ -117,7 +116,7 @@ namespace
 		struct tm now;
 		localtime_s(&now, &t);
 		char buf[80];
-		strftime(buf, sizeof(buf), "%Y-%m-%d", &now);
+		strftime(buf, sizeof(buf), "%Y/%m/%d", &now);
 		return buf;
 	}
 

@@ -18,6 +18,7 @@ int main()
 	******************************************************************/
 	
 	// initialise map and filelist
+	// nb could have multiple maps for multiple users with a 'log in' feature
 	std::map<std::string, Experiment> user;
 	std::vector<std::string> fileList = readDir();
 
@@ -29,12 +30,13 @@ int main()
 	// load all existing experiments into memory
 	for (auto iter = fileList.begin(); iter != fileList.end(); ++iter)
 	{
+		// r flag for reading from /data
 		readExperiment((*iter), user, 'r');
 	}
 	
-	bool menu{ true };
+	bool menu{ true };	// to continue menu loop
 	char menuOption;
-	char addType;
+	char addType;		// add manually or from file
 	std::string fileName;
 	std::string filePath;
 	std::map<std::string, Experiment>::iterator ptr;

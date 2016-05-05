@@ -12,11 +12,11 @@ void NumMeasure::printInfo(const char &seperator)
 	std::cout << std::left << std::setw((WIDTH / 5) - 1) << std::setfill(seperator) << "";
 }
 
-std::string NumMeasure::saveInfo(char &flag)
+std::string NumMeasure::saveInfo(char &saveFlag)
 {
 	std::string temp;
 	// change formatting based on if saving to .txt, .csv or .tex
-	switch (flag)
+	switch (saveFlag)
 	{
 		// .txt file
 		case 't':
@@ -84,11 +84,11 @@ void StringMeasure::printInfo(const char &seperator)
 	std::cout << std::left << std::setw((WIDTH / 2) - 15) << std::setfill(seperator) << "";
 }
 
-std::string StringMeasure::saveInfo(char &flag)
+std::string StringMeasure::saveInfo(char &saveFlag)
 {
 	std::string temp;
 	// change formatting based on if saving to .txt, .csv or .tex
-	switch (flag)
+	switch (saveFlag)
 	{
 		// .txt file
 		case 't':

@@ -31,7 +31,7 @@ Experiment::Experiment(Experiment&& e)
 vector<double> Experiment::errorCalc()
 {
 	double rowCount{ 0 };
-	int index{ 0 };
+	int colCount{ 0 };
 
 	vector<double> errors(headings_.size());
 
@@ -44,10 +44,11 @@ vector<double> Experiment::errorCalc()
 		{
 			// we need to sum error / value for the COLUMN - so for each element of the row
 			// we will add to the vector error in the same row format
-			index = std::distance((*vec_iter).begin(), meas_it);
+			colCount = std::distance((*vec_iter).begin(), meas_it);
 			if ((*meas_it)->getValue() != 0)
 			{
-				errors[index] += ((*meas_it)->getError() / fabs((*meas_it)->getValue()));
+				// use fabs to find absolute value for error calc
+				errors[colCount] += ((*meas_it)->getError() / fabs((*meas_it)->getValue()));
 			}
 		}
 	}
@@ -66,7 +67,7 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 	int vectorSize = v.size();
 	std::shared_ptr<Measurement> ptr;	// base class pointer
 	std::string buf;
-	int checkNum;
+	int checkIfNum;
 
 	switch (vectorSize)
 	{
@@ -75,7 +76,7 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 		{
 			double tempVal, tempErr, tempSyst;
 			try {
-				// convert to relevant type
+				// convert to double
 				tempVal = stod(v[0]);
 				tempErr = stod(v[1]);
 				tempSyst = stod(v[2]);
@@ -91,7 +92,7 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 			while (getline(ss, buf, '/'))
 			{
 				try {
-					checkNum = stoi(buf);
+					checkIfNum = stoi(buf);
 				}
 				catch (const std::invalid_argument& ia) {
 					std::cin.clear();
@@ -112,7 +113,7 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 			while (getline(ss, buf, '/'))
 			{
 				try {
-					checkNum = stoi(buf);
+					checkIfNum = stoi(buf);
 				}
 				catch (const std::invalid_argument& ia) {
 					std::cin.clear();
@@ -138,7 +139,7 @@ std::shared_ptr<Measurement> datans::addMeasurement(std::vector<std::string> v)
 void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u, char readFlag)
 {
 	std::ifstream dataFile;
-	std::string tempLine, tempLine2, buf;
+	std::string tempLine, tempLine2, buf;	 // one for the total line, one for in between tabs
 	std::vector<std::string> tempHeadings, tempDataHeadings, tempMeasurement;
 	std::vector<shared_ptr<Measurement>> rowMeasurement;
 	std::string filePath;
@@ -189,8 +190,8 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 					{
 						tempMeasurement.push_back(buf);
 					}
-
-					if (tempMeasurement.size() > 4 || tempMeasurement.size() == 3)
+					// can only be size 4 or 2
+					if (tempMeasurement.size() != 4 || tempMeasurement.size() != 2)
 					{
 						throw("Measurement should be in one of the specified formats");
 					}
@@ -213,6 +214,7 @@ void datans::readExperiment(std::string n, std::map<std::string, Experiment> &u,
 					}
 					else
 						// compare other measurements to the first to ensure same type down columns
+						// by the size of measurement compared to the length of dataheadings
 					{
 						if ((tempDataHeadings[colCount].length() < 13 && tempMeasurement.size() == 4) || (tempDataHeadings[colCount].length() > 13 && tempMeasurement.size() == 2))
 						{
@@ -340,7 +342,7 @@ void datans::addExperiment(std::map<std::string, Experiment> &u)
 						tempMeasurement.push_back(buf);
 					}
 
-					if (tempMeasurement.size() > 4 || tempMeasurement.size() == 3)
+					if (tempMeasurement.size() != 4 || tempMeasurement.size() != 2)
 					{
 						throw("Measurement should be in one of the specified formats");
 					}
@@ -489,9 +491,10 @@ int Experiment::editExperiment()
 	std::string tempCoord;
 	std::string tempStr, buf;
 	std::vector<std::string> tempMeasurement;
-	char flag = ('y');
+	char continueFlag = ('y');
 	const char seperator = ' ';
 	const int width = WIDTH;
+	// for checking whether operations completed successfully
 	int check{ 0 };
 	int checkSave{ 0 };
 	int checkInputType{ 0 };
@@ -562,10 +565,10 @@ int Experiment::editExperiment()
 			printExperiment();
 		}
 		cout << "\nContinue editing experiment? (Y/N): ";
-		std::cin >> flag;
+		std::cin >> continueFlag;
 		std::cin.ignore();
 
-	} while (tolower(flag) == 'y');
+	} while (tolower(continueFlag) == 'y');
 	
 	// update the experiment file in /data
 	if (check == 1)
@@ -583,12 +586,12 @@ int Experiment::editExperiment()
 	}
 }
 
-int Experiment::saveExperiment(char flag)
+int Experiment::saveExperiment(char saveFlag)
 {
 	char typeFlag;
 	std::string filename;
 
-	if (flag == 'e')
+	if (saveFlag == 'e')
 	{
 		// check how we are saving the file
 		cout << "Save to which format? [T]ext / [C]SV / [L]atex (q to quit): ";
@@ -614,7 +617,7 @@ int Experiment::saveExperiment(char flag)
 		}
 	}
 
-	else if (flag == 's')
+	else if (saveFlag == 's')
 	{
 		filename = name_ + ".txt";
 		typeFlag = 't';
